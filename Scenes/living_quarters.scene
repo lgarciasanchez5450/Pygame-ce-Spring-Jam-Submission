@@ -1,0 +1,41 @@
+{
+    "map_path":"./Images/Game/Maps/living_quarters.png",
+    "entities": [
+        {
+            "name":"box1",
+            "pos":[500,300],
+            "vel":[0,0],
+            "mass":1,
+            "rot":0,
+            "rot_vel":0,
+            "surf_path":"./Images/Game/Crates/Wooden.png"
+        },
+        {
+            "name":"Player",
+            "pos":[400,300],
+            "vel":[0,0],
+            "mass":1,
+            "rot":0,
+            "rot_vel":0,
+            "surf_path":"./Images/Game/Player/head.png",
+            "behaviours": [
+                "PlayerController"
+            ]
+        },
+        {
+            "name":"left_wall",
+            "pos":[0,0],
+            "vel":[0,0],
+            "mass":1,
+            "rot":0,
+            "rot_vel":0,
+            "surf_path":"./Images/Game/Player/head.png",
+            "behaviours": [
+                "PlayerController"
+            ]
+        }
+    ],
+    "behaviours": [
+        "CameraFollowPlayer"
+    ]
+}

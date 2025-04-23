@@ -1,0 +1,13 @@
+from gametypes import *
+class Behaviour:
+    _subclasses_:dict[str,'Behaviour'] = {}
+    def __init_subclass__(cls):
+        name = cls.__name__
+        if name in Behaviour._subclasses_:
+            raise NameError(f'Behaviour {cls} conflicts with another. Maybe two behaviours have the same name? (<- this cannot happen)')
+        Behaviour._subclasses_[name] = cls
+        
+    def start(self,gameObject:EntityType,game:GameType): ...
+    def update(self,gameObject:EntityType,map:MapType,dt:float,game:GameType): ... 
+    def onCollide(self,gameObject:EntityType,other:EntityType): ...
+    def onDeath(self,gameObject:EntityType,other:EntityType): ...
