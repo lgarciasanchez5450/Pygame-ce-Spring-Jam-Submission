@@ -8,6 +8,7 @@
             "mass":1,
             "rot":0,
             "rot_vel":0,
+            "collider":"MaskCollider",
             "surf_path":"./Images/Game/Crates/Wooden.png"
         },
         {
@@ -17,6 +18,7 @@
             "mass":1,
             "rot":0,
             "rot_vel":0,
+            "collider":"MaskCollider",
             "surf_path":"./Images/Game/Player/head.png",
             "behaviours": [
                 "PlayerController"
@@ -24,15 +26,27 @@
         },
         {
             "name":"left_wall",
-            "pos":[0,0],
-            "vel":[0,0],
-            "mass":1,
-            "rot":0,
-            "rot_vel":0,
-            "surf_path":"./Images/Game/Player/head.png",
-            "behaviours": [
-                "PlayerController"
-            ]
+            "pos":[24,256],
+            "mass":"inf",
+            "collider":"AABBCollider((40,400))"
+        },
+        {
+            "name":"right_wall",
+            "pos":[1000,256],
+            "mass":"inf",
+            "collider":"AABBCollider((40,400))"
+        },
+        {
+            "name":"bottom_wall",
+            "pos":[512,472],
+            "mass":"inf",
+            "collider":"AABBCollider((950,40))"
+        },
+        {
+            "name":"top_wall",
+            "pos":[512,39],
+            "mass":"inf",
+            "collider":"AABBCollider((950,40))"
         }
     ],
     "behaviours": [

@@ -8,8 +8,6 @@ class CameraFollowPlayer(SceneBehaviour):
         player = game.FindEntityByName('Player',True)
         if player is None: raise RuntimeError('Could not find player!')
         self.player = player
-        print(self.player)
-
 
     def update(self,scene:SceneType,game:GameType): ... 
     def preDraw(self,scene:SceneType,game:GameType): 

@@ -1,5 +1,5 @@
-import gui
 import sys
+import gui
 import time
 import utils
 import debug
@@ -45,7 +45,7 @@ class Game:
     def spawnEntities(self, entities:list[Entity]):
         for entity in entities:
             if entity.dirty:
-                entity.regenerate_physics()
+                entity.clean()
                 entity.dirty = False
         self.to_spawn.extend(entities)
 
@@ -98,7 +98,7 @@ class Game:
             self.game_manager.post_update(map)
             for e in self.entities:
                 if e.dirty:
-                    e.regenerate_physics()
+                    e.clean()
                     e.dirty = False
             ### Calculate Collisions ###
             physics.calc_collision_map(map,self.dt)
@@ -112,7 +112,15 @@ class Game:
             self.game_manager.pre_draw()
             # Draw All Entities #
             for e in physics.get_colliding(self.screen_rect,map):
-                screen.blit(e.surf,e.rect.topleft-self.camera_pos+self.half_screen_size)
+                ec = e.collider
+                if ec:
+                    if e.surf:
+                        s = glm.vec2(e.surf.get_size())/2
+                        screen.blit(e.surf,e.pos-s-self.camera_pos+self.half_screen_size)
+                    if f3_mode:
+                        olist = ec.mask.outline()
+                        pygame.draw.lines(screen,(200,150,150),1,[(ec.rect.topleft - self.camera_pos + self.half_screen_size + (x,y)) for x,y in olist])
+                        pygame.draw.rect(screen,(200,150,150),ec.rect.move(-self.camera_pos+self.half_screen_size),1)
             self.game_manager.ui_draw()
 
             ### Update Coroutines ###
@@ -131,12 +139,11 @@ class Game:
                 if f3_mode:
                     screen.blit(dbg_font.render(f'{self.camera_pos.x:.0f}/{self.camera_pos.y:.0f}',True,'white'))
                 if debug.Profile.active:
-                    
                     print('Frame Build:        ',utils.formatTime(t_end-t_start))
                     print('Frame Display:      ',utils.formatTime(t_final-t_end))
                     print('Total Frame Time:   ',utils.formatTime(t_final-t_start))
                     print('Update Entities:    ',utils.formatTime(t_b-t_a))
-                    print(f'Size of Global Entity Cache:',len(Entity._global_physics_cache))
+                    print(f'Size of Global Entity Cache:',len(Entity._global_cache))
 
     #### Utility Functions for Behaviours ####
     def FindEntityByName(self,name:str,search_through_unspawned:bool = False):

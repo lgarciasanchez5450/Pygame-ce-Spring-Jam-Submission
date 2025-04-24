@@ -9,6 +9,7 @@ from pygame import Surface
 
 from Behaviours.Behaviour import Behaviour
 from Behaviours.SceneBehaviours.SceneBehaviour import SceneBehaviour
+from Colliders.Collider import Collider
 from Entities.Entity import Entity
 
 
@@ -31,15 +32,37 @@ class Scene:
                 raise KeyError(f'Error Loading `{path}`. Entity Property "name" not found.')
             pos = glm.vec2(ent_data.get('pos',(0,0)))
             vel = glm.vec2(ent_data.get('vel',(0,0)))
-            mass = float(ent_data.get('mass',0))
+            mass = str(ent_data.get('mass',1))
+            if mass in ('infinity','inf'):
+                mass = float('inf')
+            else:
+                mass = float(mass)
             rot = float(ent_data.get('rot',0))
             rot_vel = float(ent_data.get('rot_vel',0))
-            surf = ResourceManager.loadAlpha(ent_data['surf_path'])
+            try:
+                surf = ResourceManager.loadAlpha(ent_data['surf_path'])
+            except KeyError:
+                surf = None
             mo_inertia = ent_data.get('moment of inertia')
             if mo_inertia is None:
                 mo_inertia = physics.calculateMomentOfInertia(surf,mass)
             else:
                 mo_inertia = float(mo_inertia)
+            col = str(ent_data.get('collider'))
+            if '(' in col:
+                i = col.index('(')
+                args = col[i:]
+                col = col[:i]
+            else:
+                args = '()'
+            if col is not None:
+                try:
+                    collider = Collider._subclasses_[col](*utils.safeEval(args))
+                except KeyError:
+                    likely_meant = utils.sortBySimilarity(behav,Collider._subclasses_.keys())[0]
+                    raise LookupError(f'Collider {col} not found! Did you mean {likely_meant}')
+            else:
+                collider = None
             behavs:list[str] = list(ent_data.get('behaviours',[]))
             behaviours:list[Behaviour] = []
             for behav in behavs:
@@ -51,7 +74,7 @@ class Scene:
             if mass < 1e-6:
                 raise ValueError(f'Error Loading `{path}` Invalid Mass: {mass}')
             #make entity
-            ent = Entity(name,pos,vel,mass,rot,rot_vel,mo_inertia,surf)
+            ent = Entity(name,pos,vel,mass,rot,rot_vel,mo_inertia,collider,surf)
             ent.behaviours = behaviours
             self.entities.append(ent)
         self.behaviours = []

@@ -8,6 +8,7 @@ from pygame import transform
 from pygame import mask
 from EntityTags import *
 
+
 from gametypes import *
 
 BT = typing.TypeVar('BT',bound=BehaviourType)
@@ -32,29 +33,30 @@ class IEntity(typing.Protocol):
 
 _cache_misses = 0
 class Entity:
-    _global_physics_cache:dict[tuple[Surface,int],tuple[Surface,Mask]] = {}
+    _global_cache:dict[tuple[Surface,int],Surface] = {}
     name:str
     pos:Vec2 # current position 
     vel:glm.vec2 # current velocity
     n_vel:glm.vec2 # next_velocity 
     mass:float
     rot:float
-    surf:Surface # surface to draw each frame
+    surf:Surface|None # surface to draw each frame
+    collider:ColliderType|None
     dirty:bool
     behaviours:list[BehaviourType]
     # The Following are for physics
-    rect:Rect # bounding Rect of the surface
-    mask:Mask # mask from surface
     tags:int
 
     __slots__ = 'name','pos','vel','mass', \
                 'rot','rot_vel','mo_inertia', \
-                'surf','_surf','dirty','dead','rect','mask','force','behaviours','bounciness',#'tags',
+                'collider', \
+                'surf','_surf','dirty','dead','mask','force','behaviours','bounciness',#'tags',
 
     def __init__(self,name:str,
                  pos:Vec2,vel:Vec2,mass:float,
                  rot:float,rot_vel:float,mo_inertia:float,
-                 _surf:Surface):
+                 collider:ColliderType|None,
+                 _surf:Surface|None):
         self.name = name
         #Translation
         self.pos = pos
@@ -64,9 +66,11 @@ class Entity:
         self.rot = rot #Radians
         self.rot_vel = rot_vel
         self.mo_inertia = mo_inertia #moment of inertia
-        
+        self.collider = collider
+
         self.bounciness = 0
         self._surf = _surf
+        self.surf = None
         self.force = glm.vec2()
         self.dirty = True
         self.dead = False
@@ -79,11 +83,9 @@ class Entity:
         for b in self.behaviours: b.update(self,map,dt,game)
 
         #Translational Motion
-        # self.vel += utils.rotateAbout(self.force,self.dir) * (dt / self.mass)
         # self.vel += glm.rotate(self.force,-self.rot) * (dt / self.mass)
         # self.force *= 0 #clear force
         self.pos += self.vel * dt
-        self.rect.center = self.pos
         self.vel *= glm.exp(-dt*5)
 
         #Rotational Motion
@@ -91,31 +93,15 @@ class Entity:
             self.rot += self.rot_vel * dt
             self.dirty = True
         self.rot_vel *= glm.exp(-dt*2)
+        if self.collider:
+            self.collider.update(self)
 
-    
-    def regenerate_physics(self):
-        degrees = self.rot*(180/3.141592653589793)#Radians to Degrees
-        if not 0:
+    def clean(self):
+        if self._surf:
+            degrees = self.rot*(180/3.141592653589793)#Radians to Degrees
             self.surf = transform.rotate(self._surf,degrees)
-            self.mask = mask.from_surface(self.surf,0)
-        else:
-            rot_hash = int(degrees*10) % (360*10) // self.cache_every
-            cache = Entity._global_physics_cache
-            key = (self._surf,rot_hash)
-            if key not in cache:
-                surf = transform.rotate(self._surf,degrees)
-                mask_ = mask.from_surface(surf,0)
-                if len(cache) < 1000:
-                    global _cache_misses
-                    _cache_misses += 1
-                    cache[key] = surf,mask_
-            else:
-                surf,mask_ = cache[key]
-            self.surf = surf
-            self.mask = mask_
-        self.rect = self.surf.get_rect()
-        self.rect.center = self.pos
-
+        if self.collider:
+            self.collider.recalculate(self)
     def onCollide(self,other:"Entity",info:CollisionInfoType,normal:glm.vec2):
         for b in self.behaviours: b.onCollide(self,other)
 

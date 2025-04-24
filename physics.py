@@ -4,6 +4,7 @@ from pyglm import glm
 from pygame import Rect
 from pygame import Mask
 from gametypes import *
+from Colliders.MaskCollider import MaskCollider
 import debug
 
 
@@ -18,22 +19,29 @@ def calc_collision_map(map:MapType,dt:float):
     collisions:dict[frozenset,CollisionInfo] = {}
     for chunk in map.values():
         for entity in chunk:
-            _r = entity.rect
+            if entity.mass == float('inf'): continue
+            assert isinstance(entity.collider,MaskCollider)
+            _r = entity.collider.rect
             _cr = _r.colliderect
-            _mo = entity.mask.overlap_mask
-            _ma = entity.mask.overlap_area
+            _w,_h = entity.collider.mask.get_size()
+            _mo = entity.collider.mask.overlap_mask
+            _ma = entity.collider.mask.overlap_area
             for other in chunk:
+                assert isinstance(other.collider,MaskCollider)
                 if other is entity: continue
-                if _cr(other.rect):
+                other_collider = other.collider
+                other_mask = other_collider.mask
+                if _cr(other_collider.rect):
                     fs = frozenset([entity,other])
                     if fs in collisions: continue
-                    x = other.rect.left - _r.left
-                    y = other.rect.top - _r.top
-                    mask =_mo(other.mask,(x,y))
+                    w,h = other_mask.get_size()
+                    x = other.pos.x - w//2 - (entity.pos.x - _w//2)
+                    y = other.pos.y - h//2 - (entity.pos.y - _h//2)
+                    mask =_mo(other_mask,(x,y))
                     set_bits = mask.count()
                     if set_bits:
-                        dx = _ma(other.mask, (x + 1, y)) - _ma(other.mask, (x - 1, y))
-                        dy = _ma(other.mask, (x, y + 1)) - _ma(other.mask, (x, y - 1))
+                        dx = _ma(other_mask, (x + 1, y)) - _ma(other_mask, (x - 1, y))
+                        dy = _ma(other_mask, (x, y + 1)) - _ma(other_mask, (x, y - 1))
 
                         collision_normal = glm.normalize(glm.vec2(dx,dy))
                         info = CollisionInfo()
@@ -44,6 +52,8 @@ def calc_collision_map(map:MapType,dt:float):
                         entity.onCollide(other,info,collision_normal)
                         other.onCollide(entity,info,-collision_normal)
                         collisions[fs] = info
+
+
 
 def resolveCollision(a:EntityType,b:EntityType,info:CollisionInfo,normal:Vec2,dt:float):
     if a.mass == float('inf'):
@@ -65,28 +75,36 @@ def resolveCollision(a:EntityType,b:EntityType,info:CollisionInfo,normal:Vec2,dt
             b_dv = d * (a.mass / (a.mass+b.mass)) 
         a.vel += a_dv
         b.vel += b_dv
-        a.pos += a_dv * dt
-        b.pos += b_dv * dt
+        a.pos += a_dv * dt * max(1,info.set_bits/20)
+        b.pos += b_dv * dt * max(1,info.set_bits/20)
     else:
-        a.vel +=  d * (b.mass / (a.mass+b.mass)) * (1 + Cr)
-        b.vel -=  d * (a.mass / (a.mass+b.mass)) * (1 + Cr)
+        if b.mass == float('inf'):
+            a.vel += d * (1 + Cr)
+        else:
+            a.vel +=  d * (b.mass / (a.mass+b.mass)) * (1 + Cr)
+            b.vel -=  d * (a.mass / (a.mass+b.mass)) * (1 + Cr)
 
     if glm.length2(normal):
-        a_dir = a.pos - info.center_of_collision
-        a_tau = utils.cross2d(a_dir,normal)
-        a.rot_vel += a_tau / a.mo_inertia
+        if b.mo_inertia == float('inf'):
+            a_dir = a.pos - info.center_of_collision
+            a_tau = utils.cross2d(a_dir,normal)
+            a.rot_vel += a_tau * dt
+        else:
+            a_dir = a.pos - info.center_of_collision
+            a_tau = utils.cross2d(a_dir,normal)
+            a.rot_vel += a_tau * (b.mo_inertia / (a.mo_inertia+b.mo_inertia)) * dt
 
-        b_dir = b.pos - info.center_of_collision
-        b_tau = utils.cross2d(b_dir,-normal)
-        b.rot_vel += b_tau / b.mo_inertia
-
+            b_dir = b.pos - info.center_of_collision
+            b_tau = utils.cross2d(b_dir,-normal)
+            b.rot_vel += b_tau * (a.mo_inertia / (a.mo_inertia+b.mo_inertia))  * dt
+        
 def get_colliding(r:Rect,map:MapType):
     s = set()
     _cr = r.colliderect
     for cpos in collide_chunks2d(r.left,r.top,r.right,r.bottom,GameConstants.CHUNK_SIZE):
         if ents:=map.get(cpos):
             for other in ents:
-                if other not in s and _cr(other.rect):
+                if other not in s and _cr(other.collider.rect):
                     s.add(other)
                     yield other
                     
@@ -126,7 +144,8 @@ def collide_line_rect(origin:Vec2,dir:Vec2,rect:Rect):
 # Initial Calculations
 from pygame import Surface
 from pygame import mask
-def calculateMomentOfInertia(s:Surface,total_mass:float):
+def calculateMomentOfInertia(s:Surface|None,total_mass:float):
+    if s is None: return total_mass
     half_size = glm.vec2(s.get_size()) / 2
     m = mask.from_surface(s,0)
     area = m.count()
@@ -134,7 +153,8 @@ def calculateMomentOfInertia(s:Surface,total_mass:float):
     sum = 0
     for y in range(s.get_height()):
         for x in range(s.get_width()):
-            dist = glm.vec2(x,y) - half_size
-            sum += glm.dot(dist,dist)
+            dist = (glm.vec2(x,y) - half_size) / 10
+            sum += glm.dot(dist,dist)   
+    
     return sum * density
     

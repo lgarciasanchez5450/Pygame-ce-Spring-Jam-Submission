@@ -33,22 +33,33 @@ BG_CHUNK_SIZE = 800
 
 @debug.Profile
 def build_map_better(entities:list[EntityType]):
+    '''
+    Build a map of chunks where each chunk is a list of entities that are in that chunk.
+    Keep in mind that entities may be in multiple chunks at once, depending on their size and position.
+    '''
     #first hash everything
     map:MapType = {}
     for ent in entities:
         assert type(ent.pos) is glm.vec2, f'Ship:{ent}'
-        r = ent.rect
-        cx1 = (r.left // CHUNK_SIZE).__floor__()
-        cy1 = (r.top // CHUNK_SIZE).__floor__()
-        cx2 = (r.right / CHUNK_SIZE).__ceil__()
-        cy2 = (r.bottom / CHUNK_SIZE).__ceil__()
-        for y in range(cy1,cy2,1):
-            for x in range(cx1,cx2,1):
-                cpos = x,y
-                if cpos not in map:
-                    map[cpos] = [ent]
-                else:
-                    map[cpos].append(ent)
+        if col:=ent.collider:
+            r = col.rect
+            cx1 = (r.left // CHUNK_SIZE).__floor__()
+            cy1 = (r.top // CHUNK_SIZE).__floor__()
+            cx2 = (r.right / CHUNK_SIZE).__ceil__()
+            cy2 = (r.bottom / CHUNK_SIZE).__ceil__()
+            for y in range(cy1,cy2,1):
+                for x in range(cx1,cx2,1):
+                    cpos = x,y
+                    if cpos not in map:
+                        map[cpos] = [ent]
+                    else:
+                        map[cpos].append(ent)
+        # else:
+        #     cpos = ent.pos.x//CHUNK_SIZE,ent.pos.y//CHUNK_SIZE
+        #     if cpos not in map:
+        #         map[cpos] = [ent]
+        #     else:
+        #         map[cpos].append(ent)
     return map
 
 
