@@ -140,7 +140,6 @@ def parseTokens(tokens:list[str]) -> typing.Any:
         elif token == 'True': return True
         elif token == 'None': return None
         
-
         elif token.startswith('"'):
             assert token.endswith('"')
             return token[1:-1]
@@ -148,4 +147,3 @@ def parseTokens(tokens:list[str]) -> typing.Any:
         elif token.startswith('\''):
             assert token.endswith('\'')
             return token[1:-1]
-

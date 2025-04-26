@@ -4,7 +4,6 @@ from pyglm import glm
 import physics
 from gametypes import *
 from pygame import Rect
-import utils
 
 class StateController[T](Controller):
     def __init__(self,initial_state:State,shared_state:T):

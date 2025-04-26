@@ -1,4 +1,4 @@
-import utils
+import Utils.utils as utils
 import typing
 from pyglm import glm
 from gametypes import *
@@ -6,8 +6,6 @@ from Entities.Bullet import Bullet
 from Entities.Spaceship import Spaceship
 from physics import CollisionInfo
 
-if typing.TYPE_CHECKING:
-    from Controllers.StateController import StateController
 
 class State:
     def start(self): ...

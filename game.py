@@ -1,7 +1,7 @@
 import sys
 import gui
 import time
-import utils
+import Utils
 import debug
 import Async
 import pygame
@@ -11,13 +11,10 @@ import physics
 from EntityTags import *
 from GameConstants import * 
 
-from Scene import Scene
 from pygame import Window
 from Builder import Builder
 from Entities.Entity import Entity
 from GameManager import GameManager
-from gui.utils.utils import useCache
-from background_image_generator import generate
 
 
 class Game:
@@ -56,7 +53,6 @@ class Game:
         if __debug__:
             f3_mode = False
             dbg_font = pygame.font.SysFont('Arial',18)
-            time_frame= False
         self.game_manager = GameManager(self,self.window)
         self.game_manager.start_game()
         self.screen_rect = pygame.Rect(0,0,self.window.size[0],self.window.size[1])
@@ -65,6 +61,7 @@ class Game:
         self.to_spawn.clear()
         for e in self.entities:
             e.start(self)
+        physics_last_state = physics.PhysicsState.new()
         while True:
             if __debug__:
                 if debug.Profile.active:
@@ -101,7 +98,7 @@ class Game:
                     e.clean()
                     e.dirty = False
             ### Calculate Collisions ###
-            physics.calc_collision_map(map,self.dt)
+            physics_last_state = physics.calc_collision_map(map,self.dt,physics_last_state)
             #remove dead entities
             for i in range(len(self.entities)-1,-1,-1):
                 if self.entities[i].dead:
@@ -112,15 +109,14 @@ class Game:
             self.game_manager.pre_draw()
             # Draw All Entities #
             for e in physics.get_colliding(self.screen_rect,map):
-                ec = e.collider
-                if ec:
+                for col in e.colliders:
                     if e.surf:
                         s = glm.vec2(e.surf.get_size())/2
                         screen.blit(e.surf,e.pos-s-self.camera_pos+self.half_screen_size)
                     if f3_mode:
-                        olist = ec.mask.outline()
-                        pygame.draw.lines(screen,(200,150,150),1,[(ec.rect.topleft - self.camera_pos + self.half_screen_size + (x,y)) for x,y in olist])
-                        pygame.draw.rect(screen,(200,150,150),ec.rect.move(-self.camera_pos+self.half_screen_size),1)
+                        olist = col.mask.outline()
+                        pygame.draw.lines(screen,(200,150,150),1,[(glm.floor(col.rect.topleft - self.camera_pos + self.half_screen_size + (x,y))) for x,y in olist])
+                        pygame.draw.rect(screen,(200,150,150),col.rect.move(glm.floor(-self.camera_pos+self.half_screen_size)),1)
             self.game_manager.ui_draw()
 
             ### Update Coroutines ###
@@ -139,10 +135,10 @@ class Game:
                 if f3_mode:
                     screen.blit(dbg_font.render(f'{self.camera_pos.x:.0f}/{self.camera_pos.y:.0f}',True,'white'))
                 if debug.Profile.active:
-                    print('Frame Build:        ',utils.formatTime(t_end-t_start))
-                    print('Frame Display:      ',utils.formatTime(t_final-t_end))
-                    print('Total Frame Time:   ',utils.formatTime(t_final-t_start))
-                    print('Update Entities:    ',utils.formatTime(t_b-t_a))
+                    print('Frame Build:        ',Utils.formatTime(t_end-t_start))
+                    print('Frame Display:      ',Utils.formatTime(t_final-t_end))
+                    print('Total Frame Time:   ',Utils.formatTime(t_final-t_start))
+                    print('Update Entities:    ',Utils.formatTime(t_b-t_a))
                     print(f'Size of Global Entity Cache:',len(Entity._global_cache))
 
     #### Utility Functions for Behaviours ####

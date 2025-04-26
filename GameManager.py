@@ -1,3 +1,4 @@
+import os
 import time
 import pygame
 import random
@@ -9,10 +10,10 @@ from EntityTags import *
 from Scene import Scene
 from Entities import Entity
 from gui.utils import utils as g_utils
-from GameConstants import BG_CHUNK_SIZE
+from GameConstants import BG_CHUNK_SIZE,SCENE_FOLDER
 from background_image_generator import generate
-from Behaviours.PlayerController import PlayerController
 from Map import Map
+
 pygame.init()
 main_font = pygame.font.Font('./font/Pixeltype.ttf', 26)
 
@@ -22,36 +23,25 @@ class GameManager:
         self.game = game
         self.window = window
         self.screen = self.window.get_surface()
-        self.scenes = {
-            'docks':Scene('Scenes/docks.scene'),
-            'living_quarters1':Scene('Scenes/living_quarters.scene')
-        }
+        self.scenes:dict[str,Scene] = {}
+
+        for filename in os.listdir(SCENE_FOLDER):
+            if filename.endswith('.scene'):
+                name = filename.removesuffix('.scene')
+                if name in self.scenes:
+                    raise NameError(f'Error Loading Scenes: There are two scenes with the name: {name}')
+                fqn = os.path.abspath(os.path.join(SCENE_FOLDER,filename))
+                self.scenes[name] = Scene(fqn)
         self.pre_draw_layers = {
             -1:1
         }
-        
-        player_surf = ResourceManager.loadAlpha('./Images/Game/Player/head.png')
-        # self.player = Entity.Entity(glm.vec2(500,500),glm.vec2(),1,
-        #                             0,0,physics.calculateMomentOfInertia(player_surf,1),
-        #                             player_surf)
-        # self.player.behaviours.append(
-        #     PlayerController()
-        # )
+
 
     def start_game(self):
-        self.scene = self.scenes['living_quarters1']
+        self.scene = self.scenes['living_quarters']
         self.map = Map(self.scene)
-        # self.game.spawnEntity(self.player)
         self.game.spawnEntities(self.scene.entities)
         self.scene.start(self.game)
-        # surf = ResourceManager.loadColorKey('./Images/Game/Crates/Wooden.png',(1,0,0))
-
-        # self.game.spawnEntity(
-        #     Entity.Entity(glm.vec2(600,500),glm.vec2(),1,
-        #                   0,0,physics.calculateMomentOfInertia(surf,1),
-        #                   surf
-        #     )
-        # )
 
     def pre_update(self): ...
 

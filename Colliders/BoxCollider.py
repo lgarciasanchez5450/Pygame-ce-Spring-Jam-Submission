@@ -6,7 +6,8 @@ from pygame import draw
 
 
 class BoxCollider(MaskCollider):
-    def __init__(self,size:tuple[int,int]|list[int]):
+    def __init__(self,size:tuple[int,int]|list[int],isTrigger=False):
+        self.isTrigger = isTrigger
         self.size = tuple(size)
         self.rect = Rect(0,0,*size)
         self._surf = Surface(size,depth=8)

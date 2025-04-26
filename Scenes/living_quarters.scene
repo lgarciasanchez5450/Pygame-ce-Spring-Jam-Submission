@@ -25,6 +25,19 @@
             ]
         },
         {
+            "name":"TriggerThingy",
+            "pos":[400,300],
+            "vel":[0,0],
+            "mass":1,
+            "rot":0,
+            "rot_vel":0,
+            "colliders":[
+                "MaskCollider",
+                "BoxCollider((100,100),True)"
+            ],
+            "surf_path":"./Images/Game/Crates/Wooden.png"
+        },
+        {
             "name":"left_wall",
             "pos":[24,256],
             "mass":"inf",

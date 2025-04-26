@@ -1,5 +1,5 @@
 import json
-import utils
+import Utils.utils as utils
 import physics
 import ResourceManager
 from pyglm import glm
@@ -48,33 +48,48 @@ class Scene:
                 mo_inertia = physics.calculateMomentOfInertia(surf,mass)
             else:
                 mo_inertia = float(mo_inertia)
-            col = str(ent_data.get('collider'))
-            if '(' in col:
-                i = col.index('(')
-                args = col[i:]
-                col = col[:i]
+            cols = ent_data.get('collider')
+            if cols is None:
+                cols = ent_data.get('colliders')
             else:
-                args = '()'
-            if col is not None:
-                try:
-                    collider = Collider._subclasses_[col](*utils.safeEval(args))
-                except KeyError:
-                    likely_meant = utils.sortBySimilarity(behav,Collider._subclasses_.keys())[0]
-                    raise LookupError(f'Collider {col} not found! Did you mean {likely_meant}')
-            else:
-                collider = None
+                cols = [cols]
+            if cols is None:
+                cols = []
+            
+            cols:list[str]
+            colliders:list[Collider] = []
+            for col in cols:
+                if '(' in col:
+                    i = col.index('(')
+                    args = col[i:]
+                    col = col[:i]
+                else:
+                    args = '()'
+                if col is not None:
+                    try:
+                        colliders.append(Collider._subclasses_[col](*utils.safeEval(args)))
+                    except KeyError:
+                        likely_meant = utils.sortBySimilarity(behav,Collider._subclasses_.keys())[0]
+                        raise LookupError(f'Collider {col} not found! Did you mean {likely_meant}')
+           
             behavs:list[str] = list(ent_data.get('behaviours',[]))
             behaviours:list[Behaviour] = []
             for behav in behavs:
+                if '(' in col :
+                    i = col.index('(')
+                    args = col[i:]
+                    behav = col[:i]
+                else:
+                    args = '()'
                 b = Behaviour._subclasses_.get(behav)
                 if b is None:
                     likely_meant = utils.sortBySimilarity(behav,Behaviour._subclasses_.keys())
                     raise LookupError(f'Behaviour {behav} not found! Did you mean {likely_meant[0]}')
-                behaviours.append(b())
+                behaviours.append(b(*utils.safeEval(args)))
             if mass < 1e-6:
                 raise ValueError(f'Error Loading `{path}` Invalid Mass: {mass}')
             #make entity
-            ent = Entity(name,pos,vel,mass,rot,rot_vel,mo_inertia,collider,surf)
+            ent = Entity(name,pos,vel,mass,rot,rot_vel,mo_inertia,colliders,surf)
             ent.behaviours = behaviours
             self.entities.append(ent)
         self.behaviours = []

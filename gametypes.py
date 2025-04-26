@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 
-type MapType = dict[tuple[int,int],list['Entity']]
+type MapType = dict[tuple[int,int],list['Collider']]
 type GameType = 'Game'
 type EntityType = 'Entity'
 type BehaviourType = 'Behaviour'

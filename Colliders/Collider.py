@@ -10,7 +10,11 @@ class Collider:
             raise NameError(f'Collider {cls} conflicts with another. Maybe two behaviours have the same name? (<- this cannot happen)')
         Collider._subclasses_[name] = cls
 
+
+    gameObject:EntityType
     rect:Rect
+    isTrigger:bool
+    __slots__ = 'gameObject','rect','isTrigger'
 
     def recalculate(self,gameObject:EntityType): ...
     def update(self,gameObject:EntityType): ...

@@ -1,13 +1,18 @@
-import utils
+import typing
+import Utils.utils as utils
 from time import perf_counter
-
+import functools
+F = typing.TypeVar('F',bound=typing.Callable)
+P = typing.ParamSpec('P')
+V = typing.TypeVar('V')
 if __debug__:
+   
     class Profile:
         active = False
-        def __init__(self,func):
+        def __init__(self,func:typing.Callable[P,V]):
             self.func = func
 
-        def __call__(self, *args, **kwds):
+        def __call__(self, *args:P.args, **kwds:P.kwargs):
             if self.active:
                 t_start = perf_counter()
                 try:
@@ -20,5 +25,5 @@ if __debug__:
 else:
     class Profile:#type: ignore[same-name]
         active:bool = False
-        def __new__(cls,func):
+        def __new__(cls,func:F):
             return func 

@@ -1,6 +1,6 @@
 from Entities.Entity import *
 from EntityTags import *
-from utils import expDecay
+from Utils.utils import expDecay
 if __debug__:
     from EntityTags import ICanDamage
 

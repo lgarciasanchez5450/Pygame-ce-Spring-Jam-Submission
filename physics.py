@@ -1,10 +1,11 @@
-import utils
+
 import GameConstants
 from pyglm import glm
 from pygame import Rect
 from pygame import Mask
 from gametypes import *
 from Colliders.MaskCollider import MaskCollider
+import Utils as utils
 import debug
 
 
@@ -14,45 +15,93 @@ class CollisionInfo:
     set_bits:int
     __slots__ = 'mask','center_of_collision','set_bits'
 
+class PhysicsState:
+    collisions:dict[frozenset,CollisionInfo]
+    triggers:set[frozenset[EntityType]]
+
+    __slots__ = 'collisions','triggers'
+    def __init__(self,collisions:dict[frozenset[EntityType],CollisionInfo],triggers:set[frozenset[EntityType]]):
+        self.collisions = collisions
+        self.triggers = triggers
+
+    @classmethod
+    def new(cls):
+        return cls({},set())
+
 @debug.Profile
-def calc_collision_map(map:MapType,dt:float):
+def calc_collision_map(map:MapType,dt:float,lastState:PhysicsState):
     collisions:dict[frozenset,CollisionInfo] = {}
+    triggers:set[frozenset[EntityType]] = set()
     for chunk in map.values():
-        for entity in chunk:
-            if entity.mass == float('inf'): continue
-            assert isinstance(entity.collider,MaskCollider)
-            _r = entity.collider.rect
+        for collider in chunk:
+            assert isinstance(collider,MaskCollider)
+            _r = collider.rect
             _cr = _r.colliderect
-            _w,_h = entity.collider.mask.get_size()
-            _mo = entity.collider.mask.overlap_mask
-            _ma = entity.collider.mask.overlap_area
-            for other in chunk:
-                assert isinstance(other.collider,MaskCollider)
-                if other is entity: continue
-                other_collider = other.collider
-                other_mask = other_collider.mask
-                if _cr(other_collider.rect):
-                    fs = frozenset([entity,other])
-                    if fs in collisions: continue
-                    w,h = other_mask.get_size()
-                    x = other.pos.x - w//2 - (entity.pos.x - _w//2)
-                    y = other.pos.y - h//2 - (entity.pos.y - _h//2)
-                    mask =_mo(other_mask,(x,y))
-                    set_bits = mask.count()
-                    if set_bits:
-                        dx = _ma(other_mask, (x + 1, y)) - _ma(other_mask, (x - 1, y))
-                        dy = _ma(other_mask, (x, y + 1)) - _ma(other_mask, (x, y - 1))
+            _w,_h = collider.mask.get_size()
+            _mo = collider.mask.overlap
+            _mom = collider.mask.overlap_mask
+            _moa = collider.mask.overlap_area
+            entity = collider.gameObject
+            if collider.isTrigger:
+                for other_collider in chunk:
+                    if other_collider is collider: continue
+                    assert isinstance(other_collider,MaskCollider)
+                    other_mask = other_collider.mask
+                    other_entity = other_collider.gameObject
+                    if other_entity is entity: continue
+                    if _cr(other_collider.rect):
+                        fs = frozenset([entity,other_entity])
+                        if fs in triggers: continue
+                        w,h = other_mask.get_size()
+                        x = other_entity.pos.x - w//2 - (entity.pos.x - _w//2)
+                        y = other_entity.pos.y - h//2 - (entity.pos.y - _h//2)
+                        if _mo(other_mask,(x,y)) is not None:
+                            triggers.add(fs)
+            else:
+                if entity.mass == float('inf'): continue
+                for other_collider in chunk:
+                    if other_collider is collider: continue
+                    if other_collider.isTrigger: continue
+                    assert isinstance(other_collider,MaskCollider)
+                    other_mask = other_collider.mask
+                    other_entity = other_collider.gameObject
+                    if other_entity is entity: continue
+                    if _cr(other_collider.rect):
+                        fs = frozenset([entity,other_entity])
+                        if fs in collisions: continue
+                        w,h = other_mask.get_size()
+                        x = other_entity.pos.x - w//2 - (entity.pos.x - _w//2)
+                        y = other_entity.pos.y - h//2 - (entity.pos.y - _h//2)
+                        mask =_mom(other_mask,(x,y))
+                        set_bits = mask.count()
+                        if set_bits:
+                            dx = _moa(other_mask, (x + 1, y)) - _moa(other_mask, (x - 1, y))
+                            dy = _moa(other_mask, (x, y + 1)) - _moa(other_mask, (x, y - 1))
 
-                        collision_normal = glm.normalize(glm.vec2(dx,dy))
-                        info = CollisionInfo()
-                        info.mask = mask
-                        info.center_of_collision = glm.vec2(mask.centroid()) + _r.topleft
-                        info.set_bits = set_bits
-                        resolveCollision(entity,other,info,collision_normal,dt)
-                        entity.onCollide(other,info,collision_normal)
-                        other.onCollide(entity,info,-collision_normal)
-                        collisions[fs] = info
+                            collision_normal = glm.normalize(glm.vec2(dx,dy))
+                            info = CollisionInfo()
+                            info.mask = mask
+                            info.center_of_collision = glm.vec2(mask.centroid()) + _r.topleft
+                            info.set_bits = set_bits
+                            resolveCollision(entity,other_entity,info,collision_normal,dt)
+                            entity.onCollide(other_collider,info,collision_normal)
+                            other_entity.onCollide(entity,info,-collision_normal)
+                            collisions[fs] = info
 
+    for fs in triggers:
+        a,b = fs
+        if fs in lastState.triggers:
+            a.onTriggerStay(b)
+            b.onTriggerStay(a)
+        else:
+            a.onTriggerEnter(b)
+            b.onTriggerEnter(a)
+    for fs in lastState.triggers.difference(triggers):
+        a,b = fs
+        a.onTriggerLeave(b)
+        b.onTriggerLeave(a)
+
+    return PhysicsState(collisions,triggers)
 
 
 def resolveCollision(a:EntityType,b:EntityType,info:CollisionInfo,normal:Vec2,dt:float):
@@ -97,16 +146,29 @@ def resolveCollision(a:EntityType,b:EntityType,info:CollisionInfo,normal:Vec2,dt
             b_dir = b.pos - info.center_of_collision
             b_tau = utils.cross2d(b_dir,-normal)
             b.rot_vel += b_tau * (a.mo_inertia / (a.mo_inertia+b.mo_inertia))  * dt
+        import math
+        if not math.isfinite(b.rot_vel) or not math.isfinite(a.rot_vel):
+            print('A:')
+            print('\tname:',a.name)
+            print('\tmo_inertia:',a.mo_inertia)
+            print('\tpos:',a.pos)
+            print('\trot:',a.rot)
+            print('B:')
+            print('\tname:',b.name)
+            print('\tmo_inertia:',b.mo_inertia)
+            print('\tpos:',b.pos)
+            print('\trot:',b.rot)
         
 def get_colliding(r:Rect,map:MapType):
     s = set()
     _cr = r.colliderect
     for cpos in collide_chunks2d(r.left,r.top,r.right,r.bottom,GameConstants.CHUNK_SIZE):
-        if ents:=map.get(cpos):
-            for other in ents:
-                if other not in s and _cr(other.collider.rect):
-                    s.add(other)
-                    yield other
+        if cols:=map.get(cpos):
+            for other in cols:
+                ent = other.gameObject
+                if ent not in s and _cr(other.rect):
+                    s.add(ent)
+                    yield ent
                     
 def collide_chunks2d(x1:float,y1:float,x2:float,y2:float,chunk_size:int):
     cx1 = (x1 // chunk_size).__floor__()

@@ -54,8 +54,20 @@ class Context:
         for i in reversed(to_wait):
             self.coros.pop(i)
 
-    def addCoroutine(self,coro:Coroutine):
+    def StartCoroutine(self,coro:Coroutine):
         self.coros.append(coro)
+        return True
 
+    def StopCoroutine(self,coro:Coroutine):
+        try:
+            self.coros.remove(coro)
+        except ValueError:
+            for key,value in self.waiting.items():
+                if value is coro:
+                    break
+            else:
+                return False
+            del self.waiting[key]
+        return True
     def getNumCoros(self):
         return len(self.coros)

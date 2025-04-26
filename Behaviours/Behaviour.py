@@ -6,6 +6,8 @@ class Behaviour:
         if name in Behaviour._subclasses_:
             raise NameError(f'Behaviour {cls} conflicts with another. Maybe two behaviours have the same name? (<- this cannot happen)')
         Behaviour._subclasses_[name] = cls
+
+    __slots__ = ()
         
     def start(self,gameObject:EntityType,game:GameType): ...
     def update(self,gameObject:EntityType,map:MapType,dt:float,game:GameType): ... 

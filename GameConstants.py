@@ -16,6 +16,8 @@ NULL_SURF = pygame.Surface((0,0))
 CHUNK_SIZE = 800
 BG_CHUNK_SIZE = 800
 
+SCENE_FOLDER = './Scenes'
+
 # def build_map(entities:list[EntityType]):
 #     #first hash everything
 #     map:MapType = {}
@@ -40,8 +42,7 @@ def build_map_better(entities:list[EntityType]):
     #first hash everything
     map:MapType = {}
     for ent in entities:
-        assert type(ent.pos) is glm.vec2, f'Ship:{ent}'
-        if col:=ent.collider:
+        for col in ent.colliders:
             r = col.rect
             cx1 = (r.left // CHUNK_SIZE).__floor__()
             cy1 = (r.top // CHUNK_SIZE).__floor__()
@@ -51,9 +52,9 @@ def build_map_better(entities:list[EntityType]):
                 for x in range(cx1,cx2,1):
                     cpos = x,y
                     if cpos not in map:
-                        map[cpos] = [ent]
+                        map[cpos] = [col]
                     else:
-                        map[cpos].append(ent)
+                        map[cpos].append(col)
         # else:
         #     cpos = ent.pos.x//CHUNK_SIZE,ent.pos.y//CHUNK_SIZE
         #     if cpos not in map:

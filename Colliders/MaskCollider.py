@@ -9,10 +9,9 @@ class MaskCollider(Collider):
     _global_cache:dict[tuple[Surface,int],Mask] = {}
     mask:Mask
 
-    def __init__(self,cache:int=2):
+    def __init__(self,isTrigger=False,cache:int=2):
         self.cache = cache
-
-        
+        self.isTrigger = isTrigger
 
     def recalculate(self, gameObject:EntityType):
         assert gameObject._surf is not None
