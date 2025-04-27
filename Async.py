@@ -1,4 +1,32 @@
 import typing
+from gametypes import *
+
+class Timer:
+    def __init__(self,time:float,game:GameType):
+        self.time = time
+        self.game = game
+    
+    def start(self):
+        self.start_time = self.game.time
+        self.stop_time = self.game.time + self.time
+
+    def isRunning(self):
+        return self.game.time <= self.stop_time
+    
+    def getTimePassed(self):
+        return self.game.time - self.start_time
+
+    def getTimePassedPercent(self):
+        return self.getTimePassed() / self.time
+    
+    def getTimeLeft(self):
+        return self.stop_time - self.game.time
+    
+    def getTimeLeftPercent(self):
+        return self.getTimeLeft() / self.time
+    
+    
+    
 
 class Delay:
     __slots__ = ()

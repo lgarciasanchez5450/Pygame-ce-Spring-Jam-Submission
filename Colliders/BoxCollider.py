@@ -1,18 +1,20 @@
 from GameConstants import RAD_TO_DEG,TWO_PI,PI_OVER_TWO,PI
 from Colliders.Collider import *
 from Colliders.MaskCollider import *
+from pygame import transform
 from math import sin,cos
-from pygame import draw
 
 
 class BoxCollider(MaskCollider):
-    def __init__(self,size:tuple[int,int]|list[int],isTrigger=False):
+    __slots__ = 'size','_surf','rot',
+    def __init__(self,size:tuple[int,int]|list[int],isTrigger=False,layers:int=1):
         self.isTrigger = isTrigger
         self.size = tuple(size)
         self.rect = Rect(0,0,*size)
         self._surf = Surface(size,depth=8)
         self._surf.set_colorkey((0,0,0))
         self._surf.fill((255,255,255))
+        self.layers = layers
         
         self.mask = mask.from_surface(self._surf)
     
@@ -24,10 +26,10 @@ class BoxCollider(MaskCollider):
         self.rect.width = width
         self.rect.height = height
         self.mask = mask.from_surface(transform.rotate(self._surf,r * RAD_TO_DEG))
-        self.pos = self.rect.center = gameObject.pos
+        self.rect.center = gameObject.pos
         
     def update(self, gameObject):
-        self.pos = self.rect.center = gameObject.pos
+        self.rect.center = gameObject.pos
 # class BoxCollider(Collider):
 #     _global_cache:dict[tuple[Surface,int],Mask] = {}
 

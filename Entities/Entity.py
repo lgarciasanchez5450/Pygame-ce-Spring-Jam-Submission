@@ -92,7 +92,9 @@ class Entity:
         if self.rot_vel: 
             self.rot += self.rot_vel * dt
             self.dirty = True
-        self.rot_vel *= glm.exp(-dt*2)
+            self.rot_vel *= glm.exp(-dt*2)
+            if abs(self.rot_vel) < 0.01:
+                self.rot_vel = 0
         for collider in self.colliders:
             collider.update(self)
 
@@ -102,15 +104,16 @@ class Entity:
             self.surf = transform.rotate(self._surf,degrees)
         for collider in self.colliders:
             collider.recalculate(self)
+    
     def onCollide(self,other:"Entity",info:CollisionInfoType,normal:glm.vec2):
         for b in self.behaviours: b.onCollide(self,other)
 
-    def onTriggerEnter(self,other:"Entity"):
-        print('onTriggerEnter')
-    def onTriggerStay(self,other:"Entity"):
-        print('onTriggerStay')
-    def onTriggerLeave(self,other:"Entity"):
-        print('onTriggerLeave')
+    def onTriggerEnter(self,other:"Entity",game:GameType):
+        for b in self.behaviours: b.onTriggerEnter(self,other,game)
+    def onTriggerStay(self,other:"Entity",game:GameType):
+        for b in self.behaviours: b.onTriggerStay(self,other,game)
+    def onTriggerLeave(self,other:"Entity",game:GameType):
+        for b in self.behaviours: b.onTriggerLeave(self,other,game)
  
     def addRelForce(self,force:glm.vec2):
         self.force += force

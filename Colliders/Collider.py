@@ -14,7 +14,8 @@ class Collider:
     gameObject:EntityType
     rect:Rect
     isTrigger:bool
-    __slots__ = 'gameObject','rect','isTrigger'
+    layers:int
+    __slots__ = 'gameObject','rect','isTrigger','layers'
 
     def recalculate(self,gameObject:EntityType): ...
     def update(self,gameObject:EntityType): ...

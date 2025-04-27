@@ -29,7 +29,7 @@ class PhysicsState:
         return cls({},set())
 
 @debug.Profile
-def calc_collision_map(map:MapType,dt:float,lastState:PhysicsState):
+def calc_collision_map(map:MapType,dt:float,game:GameType,lastState:PhysicsState):
     collisions:dict[frozenset,CollisionInfo] = {}
     triggers:set[frozenset[EntityType]] = set()
     for chunk in map.values():
@@ -42,9 +42,11 @@ def calc_collision_map(map:MapType,dt:float,lastState:PhysicsState):
             _mom = collider.mask.overlap_mask
             _moa = collider.mask.overlap_area
             entity = collider.gameObject
+            layers = collider.layers
             if collider.isTrigger:
                 for other_collider in chunk:
                     if other_collider is collider: continue
+                    if not (other_collider.layers & layers): continue
                     assert isinstance(other_collider,MaskCollider)
                     other_mask = other_collider.mask
                     other_entity = other_collider.gameObject
@@ -62,6 +64,7 @@ def calc_collision_map(map:MapType,dt:float,lastState:PhysicsState):
                 for other_collider in chunk:
                     if other_collider is collider: continue
                     if other_collider.isTrigger: continue
+                    if not (other_collider.layers & layers): continue
                     assert isinstance(other_collider,MaskCollider)
                     other_mask = other_collider.mask
                     other_entity = other_collider.gameObject
@@ -91,15 +94,15 @@ def calc_collision_map(map:MapType,dt:float,lastState:PhysicsState):
     for fs in triggers:
         a,b = fs
         if fs in lastState.triggers:
-            a.onTriggerStay(b)
-            b.onTriggerStay(a)
+            a.onTriggerStay(b,game)
+            b.onTriggerStay(a,game)
         else:
-            a.onTriggerEnter(b)
-            b.onTriggerEnter(a)
+            a.onTriggerEnter(b,game)
+            b.onTriggerEnter(a,game)
     for fs in lastState.triggers.difference(triggers):
         a,b = fs
-        a.onTriggerLeave(b)
-        b.onTriggerLeave(a)
+        a.onTriggerLeave(b,game)
+        b.onTriggerLeave(a,game)
 
     return PhysicsState(collisions,triggers)
 

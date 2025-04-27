@@ -1,5 +1,6 @@
 import json
-import Utils.utils as utils
+import typing
+import Utils
 import physics
 import ResourceManager
 from pyglm import glm
@@ -12,6 +13,7 @@ from Behaviours.SceneBehaviours.SceneBehaviour import SceneBehaviour
 from Colliders.Collider import Collider
 from Entities.Entity import Entity
 
+BT = typing.TypeVar('BT',bound=SceneBehaviourType)
 
 class Scene:
     '''This class is more of a data-holder that the Game object uses to implement scenes'''
@@ -65,27 +67,28 @@ class Scene:
                     col = col[:i]
                 else:
                     args = '()'
-                if col is not None:
-                    try:
-                        colliders.append(Collider._subclasses_[col](*utils.safeEval(args)))
-                    except KeyError:
-                        likely_meant = utils.sortBySimilarity(behav,Collider._subclasses_.keys())[0]
-                        raise LookupError(f'Collider {col} not found! Did you mean {likely_meant}')
+                args,kwargs = Utils.evalArgs(args)
+                try:
+                    colliders.append(Collider._subclasses_[col](*args,**kwargs))
+                except KeyError:
+                    likely_meant = Utils.sortBySimilarity(behav,Collider._subclasses_.keys())[0]
+                    raise LookupError(f'Collider {col} not found! Did you mean {likely_meant}')
            
             behavs:list[str] = list(ent_data.get('behaviours',[]))
             behaviours:list[Behaviour] = []
             for behav in behavs:
-                if '(' in col :
-                    i = col.index('(')
-                    args = col[i:]
-                    behav = col[:i]
+                if '(' in behav :
+                    i = behav.index('(')
+                    args = behav[i:]
+                    behav = behav[:i]
                 else:
                     args = '()'
+                args,kwargs = Utils.evalArgs(args)
                 b = Behaviour._subclasses_.get(behav)
                 if b is None:
-                    likely_meant = utils.sortBySimilarity(behav,Behaviour._subclasses_.keys())
+                    likely_meant = Utils.sortBySimilarity(behav,Behaviour._subclasses_.keys())
                     raise LookupError(f'Behaviour {behav} not found! Did you mean {likely_meant[0]}')
-                behaviours.append(b(*utils.safeEval(args)))
+                behaviours.append(b(*args,**kwargs))
             if mass < 1e-6:
                 raise ValueError(f'Error Loading `{path}` Invalid Mass: {mass}')
             #make entity
@@ -97,13 +100,20 @@ class Scene:
             s_behavs = map_data.pop('behaviours')
         except KeyError:
             s_behavs = []
+        s_behav:list[str]
         for s_behav in s_behavs:
+            if '(' in s_behav:
+                i = s_behav.index('(')
+                args = s_behav[i:]
+                s_behav = s_behav[:i]
+            else:
+                args = '()'
+            args,kwargs = Utils.evalArgs(args)
             b = SceneBehaviour._subclasses_.get(s_behav)
             if b is None:
-                likely_meant = utils.sortBySimilarity(s_behav,SceneBehaviour._subclasses_.keys())
+                likely_meant = Utils.sortBySimilarity(s_behav,SceneBehaviour._subclasses_.keys())
                 raise LookupError(f'Behaviour {s_behav} not found! Did you mean {likely_meant[0]}')
-            self.behaviours.append(b())
-
+            self.behaviours.append(b(*args,**kwargs))
 
         if map_data: 
             print(f'[Scene Loading Warning] Scene {path} has unused data: {tuple(map_data.keys())}')
@@ -116,3 +126,12 @@ class Scene:
 
     def preDraw(self,game:GameType):
         for b in self.behaviours: b.preDraw(self,game)
+    def postDraw(self,game:GameType):
+        for b in self.behaviours: b.postDraw(self,game)
+    def GetBehaviour(self,bt:type[BT]) -> BT:
+        for b in self.behaviours:
+            if type(b) is bt:
+                return b
+
+    def stop(self,game:GameType):
+        for b in self.behaviours: b.stop(self,game)

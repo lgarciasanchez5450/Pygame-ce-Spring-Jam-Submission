@@ -18,7 +18,7 @@
             "mass":1,
             "rot":0,
             "rot_vel":0,
-            "collider":"MaskCollider",
+            "collider":"MaskCollider(layers=3)",
             "surf_path":"./Images/Game/Player/head.png",
             "behaviours": [
                 "PlayerController"
@@ -26,16 +26,19 @@
         },
         {
             "name":"TriggerThingy",
-            "pos":[400,300],
+            "pos":[380,450],
             "vel":[0,0],
             "mass":1,
             "rot":0,
             "rot_vel":0,
             "colliders":[
                 "MaskCollider",
-                "BoxCollider((100,100),True)"
+                "BoxCollider((100,100),isTrigger=True,layers=2)"
             ],
-            "surf_path":"./Images/Game/Crates/Wooden.png"
+            "surf_path":"./Images/Game/Crates/Wooden.png",
+            "behaviours": [
+                "SceneTransporter('docks')"
+            ]
         },
         {
             "name":"left_wall",
@@ -63,6 +66,7 @@
         }
     ],
     "behaviours": [
+        "SaveEntities",
         "CameraFollowPlayer"
     ]
 }

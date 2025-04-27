@@ -98,7 +98,7 @@ class Game:
                     e.clean()
                     e.dirty = False
             ### Calculate Collisions ###
-            physics_last_state = physics.calc_collision_map(map,self.dt,physics_last_state)
+            physics_last_state = physics.calc_collision_map(map,self.dt,self,physics_last_state)
             #remove dead entities
             for i in range(len(self.entities)-1,-1,-1):
                 if self.entities[i].dead:

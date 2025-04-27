@@ -1,6 +1,5 @@
 from GameConstants import RAD_TO_DEG
 from Colliders.Collider import *
-from pygame import transform
 from pygame import mask
 from pygame import Surface
 from pygame import Mask
@@ -8,10 +7,11 @@ from pygame import Mask
 class MaskCollider(Collider):
     _global_cache:dict[tuple[Surface,int],Mask] = {}
     mask:Mask
-
-    def __init__(self,isTrigger=False,cache:int=2):
+    __slots__ = 'cache','mask'
+    def __init__(self,isTrigger=False,layers:int=1,cache:int=2):
         self.cache = cache
         self.isTrigger = isTrigger
+        self.layers = layers
 
     def recalculate(self, gameObject:EntityType):
         assert gameObject._surf is not None

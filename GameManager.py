@@ -37,10 +37,11 @@ class GameManager:
         }
 
 
+
+
     def start_game(self):
         self.scene = self.scenes['living_quarters']
         self.map = Map(self.scene)
-        self.game.spawnEntities(self.scene.entities)
         self.scene.start(self.game)
 
     def pre_update(self): ...
@@ -57,4 +58,18 @@ class GameManager:
 
         self.screen.blit(self.scene.map,glm.floor(game.half_screen_size - game.camera_pos))
 
-    def ui_draw(self): ...
+    def ui_draw(self): 
+        self.scene.postDraw(self.game)
+
+    #Public Utility Methods
+
+    def PopDialogue(self,text:str,chars_per_second:int)
+
+    def StartScene(self,scene:Scene):
+        if self.scene is scene:
+            #freak out /aka get freaky
+            pass
+        else:
+            self.scene.stop(self.game)
+            self.scene = scene
+            self.scene.start(self.game)

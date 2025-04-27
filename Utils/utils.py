@@ -2,7 +2,7 @@ import math
 import typing
 import difflib
 from pyglm import glm
-from gametypes import *
+type Vec2 = glm.vec2
 
 def expDecay(a,b,decay:float,dt:float):
     return b+(a-b)*math.exp(-decay*dt)
@@ -10,6 +10,18 @@ def expDecay(a,b,decay:float,dt:float):
 def cross2d(a:Vec2,b:Vec2):
     return a.x*b.y-a.y*b.x
 
+def splitList[T](l:list[T],v:T) -> tuple[list[T],...]:
+    out:list[list[T]] = []
+    while True:
+        try:
+            i = l.index(v)
+        except:
+            out.append(l)
+            return out
+        else:
+            out.append(l[:i])
+
+            l = l[i+1:]
 
 def formatBytes(b:int):
     i = 0
@@ -17,6 +29,7 @@ def formatBytes(b:int):
         i += 1
         b >>= 10
     return f'{b} {['B','KiB','MiB','GiB'][i]}'
+
 def formatTime(b:int,*,decimals:int=2):
     if b <= 0:
         return f'{b} s'
@@ -38,7 +51,6 @@ def vecFromPolar(x:float):
         glm.sin(x)
     )
 
-
 def sortBySimilarity(s:str,l:typing.Iterable[str]):
     m = difflib.SequenceMatcher(False,'',s)
     def rank(other:str):
@@ -47,41 +59,113 @@ def sortBySimilarity(s:str,l:typing.Iterable[str]):
     return sorted(l,key=rank,reverse=True)
 
 
-S_NUM = 0
-S_STR1 = 1
-S_STR2 = 2
-S_LST = 3
-S_TPL = 4
-S_NUL = 5
 def safeEval(s:str):
+    tokens = tokenize(s,{
+        '[':None,
+        ']':None,
+        ' ':None,
+        '(':None,
+        ')':None,
+        ',':None,
+        "'":"'",
+        '"':'"'
+    })
 
-    separators = list(' [](),\'"')
+    return parseTokens(tokens)
+
+def evalArgs(s:str) -> tuple[tuple[typing.Any,...],dict[str,typing.Any]]:
+    tokens = tokenize(s,{
+        '[':None,
+        ']':None,
+        ' ':None,
+        '(':None,
+        ')':None,
+        '{':None,
+        '}':None,
+        ':':None,
+        ',':None,
+        '=':None,
+        "'":"'",
+        '"':'"',
+    })
+    if len(tokens) == 2:
+        if tokens[0] == '(' and tokens[1] == ')':
+            return ((),{})
+        else:
+            raise SyntaxError(f'Unparsable Tokens: {repr(s)} -> {repr(tokens)}')
+    assert len(tokens) > 2
+    container = containerize(tokens,{'[':']','(':')','{':'}'})
+    assert tokens[0]+tokens[-1]  == '()'
+    return parseFuncArgsContainer(container)
+
+def tokenize(s:str,seperators:dict[str,str|None]):
     def rank(c:str):
         try:
             return s.index(c)
         except:
             return len(s)
-    tokens:list[str] = []
-    skip_to = None
-
+    out:list[str] = []
+    skip_to:str|None = None
+    
     while s:
         if skip_to:
-            index = rank(skip_to)
-            skip_to = False
+            seperator = skip_to
+            skip_to = None
         else:
-            index = min(map(rank,separators))
+            seperator = min(seperators.keys(),key=lambda s:rank(s))
+            skip_to = seperators[seperator]
+
+        index = rank(seperator)
+        length = len(seperator)
+
         before = s[:index].strip()
-        if before: tokens.append(before)
-        token = s[index:index+1].strip()
-        if token == '"':
-            skip_to = '"'
-        elif token == "'":
-            skip_to = "'"
-        if token: tokens.append(token)
-        s = s[index+1:]
+        if before: out.append(before)
+        token = s[index:index+length].strip()
+        if token: out.append(token)
+        s = s[index+length:]
+    return out
+
+type SContainerType = tuple[str,list[str|"SContainerType"]]
+
+def containerize(tokens:list[str],containers:dict[str,str]) -> SContainerType:
+    assert tokens[0] in containers
+    i = 0
+    def _containerize() -> SContainerType:
+        nonlocal i
+        typ = tokens[i]
+        ending = containers[typ]
+        inside_tokens:list[str|SContainerType] = []
+        i += 1
+        while True:
+            cur_token = tokens[i]
+            if cur_token == ending:
+                return (typ,inside_tokens)
+            elif cur_token in containers:
+                inside_tokens.append(_containerize())
+            else:
+                inside_tokens.append(cur_token)
+            i+=1
+
+    return _containerize()                
+
+
+
     
-    return parseTokens(tokens)
-        
+    
+def prettyPrintContainers(container:SContainerType,tabs=0):
+    typ,tokens = container
+    print(f'{'   '*tabs}Container{typ}')
+    
+    for token in tokens:
+        if type(token) is tuple:
+            prettyPrintContainers(token,tabs+1)
+        else:
+            print(f'{'   '*(tabs+1)}{token}')
+    print('   '*tabs,{'(':')','[':']','{':'}','<':'>'}[typ],sep='')
+
+
+
+
 def parseTokens(tokens:list[str]) -> typing.Any:
     if tokens[0] == '"':
         assert tokens[-1]=='"'
@@ -139,11 +223,106 @@ def parseTokens(tokens:list[str]) -> typing.Any:
         if token == 'False': return False
         elif token == 'True': return True
         elif token == 'None': return None
-        
-        elif token.startswith('"'):
-            assert token.endswith('"')
-            return token[1:-1]
 
-        elif token.startswith('\''):
-            assert token.endswith('\'')
-            return token[1:-1]
+
+def parseTokensNonContainer(tokens:list[str]) -> typing.Any:
+    if tokens[0] == '"':
+        assert tokens[-1]=='"'
+        assert len(tokens) == 3
+        return tokens[1]
+    if tokens[0] == "'":
+        assert tokens[-1]=="'"
+        assert len(tokens) == 3
+        return tokens[1]
+    assert len(tokens) == 1
+    tok = tokens[0]
+    try:
+        return int(tok)
+    except ValueError: pass
+    try:
+        return float(tok)
+    except ValueError: pass
+    return {
+        'False':False,
+        'True':True,
+        'None':None,
+    }[tok]
+def parseFuncArgsContainer(container:SContainerType) -> tuple[tuple[typing.Any],dict[str,typing.Any]]:
+    def containerToValue(container:SContainerType) -> typing.Any:
+        typ,tokens = container
+        if typ == '{': #dictionary
+            if not tokens:
+                return {}
+            out:dict[typing.Any,typing.Any] = {}
+            values = splitList(tokens,',')
+            for v in values:
+                key,value = splitList(v,':')
+                key = parseTokensNonContainer(key)
+                if len(value) == 1 and type(value[0]) is tuple:
+                    value = containerToValue(value[0])
+                else:
+                    value:str
+                    value = parseTokensNonContainer(value)
+                out[key] = value
+
+            return out
+        elif typ == '(':
+            out:list[typing.Any] = []
+            if not tokens:
+                return tuple()
+            values = splitList(tokens,',')
+            for v in values:
+                if not v: continue
+                if len(v)==1 and type(v[0]) is tuple:
+                    v = containerToValue(v[0])
+                else:
+                    v = parseTokensNonContainer(v)
+                out.append(v)
+            return tuple(out)
+        elif typ == '[':
+            if not tokens:
+                return []
+            out:list[typing.Any] = []
+            values = splitList(tokens,',')
+            for v in values:
+                if not v: continue
+
+                if len(v)==1 and type(v[0]) is tuple:
+                    v = containerToValue(v[0])
+                else:
+                    v = parseTokensNonContainer(v)
+                out.append(v)
+            return out
+        else:
+            raise TypeError(f"Unknown Container Type: {typ}")
+    typ,tokens = container
+    assert typ == '('
+    values = splitList(tokens,',')
+    args:list[typing.Any] = []
+    kwargs:dict[str,typing.Any] = {}
+    doing_kwargs = False
+    for v in values:
+        if not doing_kwargs:
+            if '=' in v:
+                doing_kwargs = True
+            else:
+                if len(v)==1 and type(v[0]) is tuple:
+                    value = containerToValue(v[0])
+                else:
+                    value = parseTokensNonContainer(v)
+                args.append(value)
+        if doing_kwargs:
+            if '=' not in v:
+                raise SyntaxError('positional argument follows keyword argument')
+            key,value = splitList(v,'=')
+            assert len(key)==1,f'Invalid Keyword Argument: {v}'
+            key = key[0]
+            assert type(key) is str
+            if key in kwargs:
+                raise SyntaxError(f"duplicate keyword: {key}")
+            if type(value) is tuple:
+                value = containerToValue(value)
+            else:
+                value = parseTokensNonContainer(value)
+            kwargs[key] = value
+    return tuple(args),kwargs    
