@@ -1,12 +1,11 @@
 import typing
 from pyglm import glm
-from pygame import Surface
 from pygame import Mask
 from pygame import Rect
-
+from pygame import Surface
 from pygame import transform
-from EntityTags import *
 
+from EntityTags import *
 from gametypes import *
 
 BT = typing.TypeVar('BT',bound=BehaviourType)
@@ -110,8 +109,10 @@ class Entity:
 
     def onTriggerEnter(self,other:"Entity",game:GameType):
         for b in self.behaviours: b.onTriggerEnter(self,other,game)
+
     def onTriggerStay(self,other:"Entity",game:GameType):
         for b in self.behaviours: b.onTriggerStay(self,other,game)
+
     def onTriggerLeave(self,other:"Entity",game:GameType):
         for b in self.behaviours: b.onTriggerLeave(self,other,game)
  
@@ -126,5 +127,9 @@ class Entity:
         for b in self.behaviours:
             if type(b) is behaviour_type:
                 return b
+            
+    def getBehaviours(self,behaviour_type:type[BT]) -> list[BT]:
+        return [b for b in self.behaviours if isinstance(b,behaviour_type)]
+
 
 

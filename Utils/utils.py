@@ -30,14 +30,14 @@ def formatBytes(b:int):
         b >>= 10
     return f'{b} {['B','KiB','MiB','GiB'][i]}'
 
-def formatTime(b:int,*,decimals:int=2):
+def formatTime(b:int,*,format = '.2f'):
     if b <= 0:
         return f'{b} s'
     i = 0
     while b < 1:
         i += 1
         b *= 1000
-    return f'{{:.{decimals}f}} {['s','ms','µs','ns'][i]}'.format(b)
+    return f'{{:{format}}} {['s','ms','µs','ns'][i]}'.format(b)
 
 def rotateAbout(a:Vec2,b:Vec2):
     return glm.vec2(

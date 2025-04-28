@@ -12,7 +12,6 @@ from EntityTags import *
 from GameConstants import * 
 
 from pygame import Window
-from Builder import Builder
 from Entities.Entity import Entity
 from GameManager import GameManager
 
@@ -22,7 +21,6 @@ class Game:
         self.background = {}
         self.entities:list[Entity] = []
         self.clock = pygame.time.Clock()
-        self.builder = Builder()
         self.window = window
         self.half_screen_size = glm.vec2(window.size) / 2
 
@@ -93,10 +91,14 @@ class Game:
             if __debug__ and debug.Profile.active:
                 t_b = time.perf_counter()
             self.game_manager.post_update(map)
+            if __debug__ and debug.Profile.active:
+                t_c = time.perf_counter()
             for e in self.entities:
                 if e.dirty:
                     e.clean()
                     e.dirty = False
+            if __debug__ and debug.Profile.active:
+                t_d = time.perf_counter()
             ### Calculate Collisions ###
             physics_last_state = physics.calc_collision_map(map,self.dt,self,physics_last_state)
             #remove dead entities
@@ -106,7 +108,11 @@ class Game:
                     del self.entities[i]    
 
             ### Draw Routine ###
+            if __debug__ and debug.Profile.active:
+                t_e = time.perf_counter()
             self.game_manager.pre_draw()
+            if __debug__ and debug.Profile.active:
+                t_f = time.perf_counter()
             # Draw All Entities #
             for e in physics.get_colliding(self.screen_rect,map):
                 for col in e.colliders:
@@ -117,8 +123,11 @@ class Game:
                         olist = col.mask.outline()
                         pygame.draw.lines(screen,(200,150,150),1,[(glm.floor(col.rect.topleft - self.camera_pos + self.half_screen_size + (x,y))) for x,y in olist])
                         pygame.draw.rect(screen,(200,150,150),col.rect.move(glm.floor(-self.camera_pos+self.half_screen_size)),1)
+            if __debug__ and debug.Profile.active:
+                t_g = time.perf_counter()
             self.game_manager.ui_draw()
-
+            if __debug__ and debug.Profile.active:
+                t_h = time.perf_counter()
             ### Update Coroutines ###
             self.asyncCtx.update(self.time,self.frame)
             
@@ -135,10 +144,19 @@ class Game:
                 if f3_mode:
                     screen.blit(dbg_font.render(f'{self.camera_pos.x:.0f}/{self.camera_pos.y:.0f}',True,'white'))
                 if debug.Profile.active:
-                    print('Frame Build:        ',Utils.formatTime(t_end-t_start))
-                    print('Frame Display:      ',Utils.formatTime(t_final-t_end))
-                    print('Total Frame Time:   ',Utils.formatTime(t_final-t_start))
-                    print('Update Entities:    ',Utils.formatTime(t_b-t_a))
+                    tot = t_end-t_start
+                    print(f'Input+Pre Update:   {Utils.formatTime(t_a-build_map_better.last_timed-t_start,format='6.2f')} ({100*(t_a-build_map_better.last_timed-t_start)/tot:.1f}%)',)
+                    print(f'Building Map:       {Utils.formatTime(build_map_better.last_timed,format='6.2f')} ({100*(build_map_better.last_timed)/tot:.1f}%)',)
+                    print(f'Update Entities:    {Utils.formatTime(t_b-t_a,format='6.2f')} ({100*(t_b-t_a)/tot:.1f}%)',)
+                    print(f'Post Update:        {Utils.formatTime(t_c-t_b,format='6.2f')} ({100*(t_c-t_b)/tot:.1f}%)',)
+                    print(f'Cleaning:           {Utils.formatTime(t_d-t_c,format='6.2f')} ({100*(t_d-t_c)/tot:.1f}%)',)
+                    print(f'Physics:            {Utils.formatTime(physics.calc_collision_map.last_timed,format='6.2f')} ({100*(physics.calc_collision_map.last_timed)/tot:.1f}%)',)
+                    print(f'Pre Draw:           {Utils.formatTime(t_f-t_e,format='6.2f')} ({100*(t_f-t_e)/tot:.1f}%)',)
+                    print(f'Draw:               {Utils.formatTime(t_g-t_f,format='6.2f')} ({100*(t_g-t_f)/tot:.1f}%)',)
+                    print(f'UI Draw:            {Utils.formatTime(t_h-t_g,format='6.2f')} ({100*(t_h-t_g)/tot:.1f}%)',)
+                    print(f'Frame Build:        {Utils.formatTime(t_end-t_start,format='6.2f')} ({100*(t_end-t_start)/tot:.1f}%)',)
+                    print(f'Frame Display:      {Utils.formatTime(t_final-t_end,format='6.2f')} ({100*(t_final-t_end)/(tot+t_final-t_end):.1f}%)',)
+                    print(f'Total Frame Time:   {Utils.formatTime(t_final-t_start,format='6.2f')} ({100*(t_final-t_start)/(tot+t_final-t_end):.1f}%)',)
                     print(f'Size of Global Entity Cache:',len(Entity._global_cache))
 
     #### Utility Functions for Behaviours ####

@@ -41,6 +41,33 @@
             ]
         },
         {
+            "name":"InteractNotifier",
+            "pos":[300,300],
+            "vel":[0,0],
+            "mass":1,
+            "rot":0,
+            "rot_vel":0,
+            "surf_path":"./Images/Game/UI/key_down.png",
+            "collider":"AABBCollider((1,1),isTrigger=True)"
+        },
+        {
+            "name":"TextTriggerThingy",
+            "pos":[80,80],
+            "vel":[0,0],
+            "mass":1,
+            "rot":0,
+            "rot_vel":0,
+            "colliders":[
+                "MaskCollider",
+                "BoxCollider((100,100),isTrigger=True,layers=2)"
+            ],
+            "surf_path":"./Images/Game/Crates/Wooden.png",
+            "behaviours": [
+                "ActionTriggerOnEnter('FirstDialogue')",
+                "Dialogue('FirstDialogue',[('Hello!!!',10),('My Name is TextTriggerThingy!',20)])"
+            ]
+        },
+        {
             "name":"left_wall",
             "pos":[24,256],
             "mass":"inf",

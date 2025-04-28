@@ -9,6 +9,7 @@ if __debug__:
    
     class Profile:
         active = False
+        __slots__ = 'func','last_timed'
         def __init__(self,func:typing.Callable[P,V]):
             self.func = func
 
@@ -19,11 +20,16 @@ if __debug__:
                     return self.func(*args,**kwds)
                 finally:
                     t_end = perf_counter()
-                    print(f'{self.func.__name__}: {utils.formatTime(t_end-t_start)}')
+                    self.last_timed = t_end-t_start
             else:
                 return self.func(*args,**kwds)
 else:
     class Profile:#type: ignore[same-name]
         active:bool = False
-        def __new__(cls,func:F):
+        last_timed:float
+        def __new__(cls,func:typing.Callable[P,V]) -> 'Profile': #type: ignore
             return func 
+
+        def __call__(self,*args:P.args,**kwds:P.kwargs) -> V: ...
+
+    

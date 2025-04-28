@@ -24,7 +24,7 @@ class Scene:
     def __init__(self,path:str):
         with open(path,'r') as file:
             map_data:dict = json.load(file)
-        self.map = image.load(map_data.pop('map_path')).convert()
+        self.map = ResourceManager.loadOpaque(map_data.pop('map_path'))
         self.entities = []
         for ent_data in map_data.pop('entities'):
             ent_data:dict
@@ -64,7 +64,7 @@ class Scene:
                 if '(' in col:
                     i = col.index('(')
                     args = col[i:]
-                    col = col[:i]
+                    col = col[:i] 
                 else:
                     args = '()'
                 args,kwargs = Utils.evalArgs(args)

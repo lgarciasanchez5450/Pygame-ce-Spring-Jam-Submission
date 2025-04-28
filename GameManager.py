@@ -10,9 +10,9 @@ from EntityTags import *
 from Scene import Scene
 from Entities import Entity
 from gui.utils import utils as g_utils
+from DialogueManager import DialogueManager
 from GameConstants import BG_CHUNK_SIZE,SCENE_FOLDER
 from background_image_generator import generate
-from Map import Map
 
 pygame.init()
 main_font = pygame.font.Font('./font/Pixeltype.ttf', 26)
@@ -24,6 +24,7 @@ class GameManager:
         self.window = window
         self.screen = self.window.get_surface()
         self.scenes:dict[str,Scene] = {}
+        self.dialogue_manager = DialogueManager()
 
         for filename in os.listdir(SCENE_FOLDER):
             if filename.endswith('.scene'):
@@ -36,12 +37,12 @@ class GameManager:
             -1:1
         }
 
+        self.current_dialogue:None|tuple[str|int] = None
 
 
 
     def start_game(self):
         self.scene = self.scenes['living_quarters']
-        self.map = Map(self.scene)
         self.scene.start(self.game)
 
     def pre_update(self): ...
@@ -52,18 +53,25 @@ class GameManager:
         self.scene.preDraw(self.game)
         game = self.game
         game.screen_rect.center = game.camera_pos
-        for cpos in physics.collide_chunks2d(game.screen_rect.left,game.screen_rect.top,game.screen_rect.right,game.screen_rect.bottom,BG_CHUNK_SIZE):
-            surf = g_utils.useCache(generate,cpos,self.space_bg)
-            self.screen.blit(surf,glm.floor(game.half_screen_size + glm.vec2(cpos) * BG_CHUNK_SIZE - game.camera_pos))
+        # for cpos in physics.collide_chunks2d(game.screen_rect.left,game.screen_rect.top,game.screen_rect.right,game.screen_rect.bottom,BG_CHUNK_SIZE):
+        #     surf = g_utils.useCache(generate,cpos,self.space_bg)
+        #     self.screen.blit(surf,glm.floor(game.half_screen_size + glm.vec2(cpos) * BG_CHUNK_SIZE - game.camera_pos))
 
         self.screen.blit(self.scene.map,glm.floor(game.half_screen_size - game.camera_pos))
 
     def ui_draw(self): 
+        if (d:= self.dialogue_manager.getText(self.game.time)) is not None:
+            dialogue_rect = d.get_rect()
+            dialogue_rect.centerx = self.screen.get_width()//2
+            dialogue_rect.bottom = self.screen.get_height() - 50
+            pygame.draw.rect(self.screen,'gray',dialogue_rect.inflate(10,4),0,2)
+            self.screen.blit(d,dialogue_rect)
         self.scene.postDraw(self.game)
 
     #Public Utility Methods
 
-    def PopDialogue(self,text:str,chars_per_second:int)
+    def PopDialogue(self,dialogue:tuple[str,float]|None):
+        self.dialogue_manager.setCurrentDialogue(dialogue,self.game.time)
 
     def StartScene(self,scene:Scene):
         if self.scene is scene:

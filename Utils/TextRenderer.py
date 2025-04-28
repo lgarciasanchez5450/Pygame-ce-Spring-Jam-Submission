@@ -81,7 +81,6 @@ class TextRenderer:
                     rich_line.append(RichCharacter(code_prefix[0],color))
                     if len(code_prefix) == 2:
                         rich_line.append(RichCharacter(code_prefix[1],color))
-
             yield rich_line
                 
     def render_align(self,text:str,align:float = 0) -> Surface:
