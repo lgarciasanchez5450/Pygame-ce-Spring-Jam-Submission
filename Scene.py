@@ -8,10 +8,8 @@ from gametypes import *
 from pygame import image
 from pygame import Surface
 
-from Behaviours.Behaviour import Behaviour
 from Behaviours.SceneBehaviours.SceneBehaviour import SceneBehaviour
-from Colliders.Collider import Collider
-from Entities.Entity import Entity
+import Loader
 
 BT = typing.TypeVar('BT',bound=SceneBehaviourType)
 
@@ -27,74 +25,7 @@ class Scene:
         self.map = ResourceManager.loadOpaque(map_data.pop('map_path'))
         self.entities = []
         for ent_data in map_data.pop('entities'):
-            ent_data:dict
-            try:
-                name = str(ent_data['name'])
-            except KeyError:
-                raise KeyError(f'Error Loading `{path}`. Entity Property "name" not found.')
-            pos = glm.vec2(ent_data.get('pos',(0,0)))
-            vel = glm.vec2(ent_data.get('vel',(0,0)))
-            mass = str(ent_data.get('mass',1))
-            if mass in ('infinity','inf'):
-                mass = float('inf')
-            else:
-                mass = float(mass)
-            rot = float(ent_data.get('rot',0))
-            rot_vel = float(ent_data.get('rot_vel',0))
-            try:
-                surf = ResourceManager.loadAlpha(ent_data['surf_path'])
-            except KeyError:
-                surf = None
-            mo_inertia = ent_data.get('moment of inertia')
-            if mo_inertia is None:
-                mo_inertia = physics.calculateMomentOfInertia(surf,mass)
-            else:
-                mo_inertia = float(mo_inertia)
-            cols = ent_data.get('collider')
-            if cols is None:
-                cols = ent_data.get('colliders')
-            else:
-                cols = [cols]
-            if cols is None:
-                cols = []
-            
-            cols:list[str]
-            colliders:list[Collider] = []
-            for col in cols:
-                if '(' in col:
-                    i = col.index('(')
-                    args = col[i:]
-                    col = col[:i] 
-                else:
-                    args = '()'
-                args,kwargs = Utils.evalArgs(args)
-                try:
-                    colliders.append(Collider._subclasses_[col](*args,**kwargs))
-                except KeyError:
-                    likely_meant = Utils.sortBySimilarity(behav,Collider._subclasses_.keys())[0]
-                    raise LookupError(f'Collider {col} not found! Did you mean {likely_meant}')
-           
-            behavs:list[str] = list(ent_data.get('behaviours',[]))
-            behaviours:list[Behaviour] = []
-            for behav in behavs:
-                if '(' in behav :
-                    i = behav.index('(')
-                    args = behav[i:]
-                    behav = behav[:i]
-                else:
-                    args = '()'
-                args,kwargs = Utils.evalArgs(args)
-                b = Behaviour._subclasses_.get(behav)
-                if b is None:
-                    likely_meant = Utils.sortBySimilarity(behav,Behaviour._subclasses_.keys())
-                    raise LookupError(f'Behaviour {behav} not found! Did you mean {likely_meant[0]}')
-                behaviours.append(b(*args,**kwargs))
-            if mass < 1e-6:
-                raise ValueError(f'Error Loading `{path}` Invalid Mass: {mass}')
-            #make entity
-            ent = Entity(name,pos,vel,mass,rot,rot_vel,mo_inertia,colliders,surf)
-            ent.behaviours = behaviours
-            self.entities.append(ent)
+            self.entities.append(Loader.loadEntity(ent_data))
         self.behaviours = []
         try:
             s_behavs = map_data.pop('behaviours')
@@ -102,19 +33,7 @@ class Scene:
             s_behavs = []
         s_behav:list[str]
         for s_behav in s_behavs:
-            if '(' in s_behav:
-                i = s_behav.index('(')
-                args = s_behav[i:]
-                s_behav = s_behav[:i]
-            else:
-                args = '()'
-            args,kwargs = Utils.evalArgs(args)
-            b = SceneBehaviour._subclasses_.get(s_behav)
-            if b is None:
-                likely_meant = Utils.sortBySimilarity(s_behav,SceneBehaviour._subclasses_.keys())
-                raise LookupError(f'Behaviour {s_behav} not found! Did you mean {likely_meant[0]}')
-            self.behaviours.append(b(*args,**kwargs))
-
+            self.behaviours.append(Loader.parseComplexType(s_behav,SceneBehaviour))
         if map_data: 
             print(f'[Scene Loading Warning] Scene {path} has unused data: {tuple(map_data.keys())}')
 

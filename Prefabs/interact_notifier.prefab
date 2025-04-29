@@ -6,5 +6,8 @@
     "rot":0,
     "rot_vel":0,
     "surf_path":"./Images/Game/UI/key_down.png",
-    "collider":"AABBCollider((1,1),isTrigger=True)"
+    "collider":"AABBCollider((1,1),isTrigger=True)",
+    "behaviours":[
+        "InteractNotifier"
+    ]
 }

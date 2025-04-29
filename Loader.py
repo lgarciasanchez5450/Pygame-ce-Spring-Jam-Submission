@@ -1,11 +1,11 @@
 import os
+import json
 import Utils
 import typing
 import physics
 import ResourceManager
 from pyglm import glm
 from Entities.Entity import Entity
-
 from Behaviours.Behaviour import Behaviour
 from Colliders.Collider import Collider
 
@@ -20,13 +20,14 @@ def loadEntity(e:str|dict) -> Entity:
         for directory in PATH:
             filenames = os.listdir(directory)
             if e in filenames:
-                return os.path.join(directory,e)
+                fqn = os.path.join(directory,e)
+                with open(fqn,'r') as file:
+                    return loadEntity(json.load(file))
         raise FileNotFoundError(f"Prefab {repr(e)} could not be found in PATH")
     elif type(e) is dict:
         return _parseEntityData(e)
     else:
-        raise TypeError(f'Cannot Convert type {type(e)} to Entity')
-    
+        raise TypeError(f'Cannot Convert type {type(e).__name__} to Entity')
 
 
 def _parseEntityData(data:dict[str,typing.Any]) -> Entity:
@@ -84,10 +85,11 @@ def _parseEntityData(data:dict[str,typing.Any]) -> Entity:
             raise LookupError(f'Behaviour {behav} not found! Did you mean {likely_meant[0]}')
         behaviours.append(b(*args,**kwargs))
     if mass < 1e-6:
-        raise ValueError(f'Error Loading `{path}` Invalid Mass: {mass}')
+        raise ValueError(f'Invalid Mass: {mass}')
     #make entity
     ent = Entity(name,pos,vel,mass,rot,rot_vel,mo_inertia,colliders,surf)
-
+    ent.behaviours = behaviours
+    return ent
 
 def parseComplexType(s:str,parentType:type[T],only_subtypes:bool = True) -> T:
     lookup:dict[str,type[T]] = {}

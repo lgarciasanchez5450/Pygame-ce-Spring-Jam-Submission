@@ -148,9 +148,6 @@ def containerize(tokens:list[str],containers:dict[str,str]) -> SContainerType:
 
     return _containerize()                
 
-
-
-    
     
 def prettyPrintContainers(container:SContainerType,tabs=0):
     typ,tokens = container
@@ -162,8 +159,6 @@ def prettyPrintContainers(container:SContainerType,tabs=0):
         else:
             print(f'{'   '*(tabs+1)}{token}')
     print('   '*tabs,{'(':')','[':']','{':'}','<':'>'}[typ],sep='')
-
-
 
 
 def parseTokens(tokens:list[str]) -> typing.Any:
@@ -320,8 +315,8 @@ def parseFuncArgsContainer(container:SContainerType) -> tuple[tuple[typing.Any],
             assert type(key) is str
             if key in kwargs:
                 raise SyntaxError(f"duplicate keyword: {key}")
-            if type(value) is tuple:
-                value = containerToValue(value)
+            if type(value[0]) is tuple:
+                value = containerToValue(value[0])
             else:
                 value = parseTokensNonContainer(value)
             kwargs[key] = value

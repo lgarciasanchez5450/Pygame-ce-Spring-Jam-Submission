@@ -4,7 +4,8 @@ from . import SceneTransporter
 from . import Dialogue
 from . import ActionTriggerOnEnter
 from . import ActionTriggerOnLeave
-
+from . import ActionTriggerInteract
+from . import InteractNotifier
 __all__ = [
     'Behaviour',
     'PlayerController',

@@ -1,0 +1,59 @@
+{
+    "map_path":"./Images/Game/Maps/hallway.png",
+    "entities": [
+        {
+            "name":"box1",
+            "pos":[24,182],
+            "vel":[0,0],
+            "mass":1,
+            "rot":1.570796,
+            "rot_vel":0,
+            "collider":"AABBCollider((60,60),isTrigger=True,layers=2)",
+            "behaviours":[
+                "SceneTransporter('rm-left','living_quarters')",
+                "ActionTriggerInteract('rm-left',offset=(0,-45))"
+            ]
+        },
+        {
+            "name":"Player",
+            "pos":[400,300],
+            "vel":[0,0],
+            "mass":1,
+            "rot":0,
+            "rot_vel":0,
+            "collider":"MaskCollider(layers=3)",
+            "surf_path":"./Images/Game/Player/head.png",
+            "behaviours": [
+                "PlayerController"
+            ]
+        },
+        {
+            "name":"left_wall",
+            "pos":[24,180],
+            "mass":"inf",
+            "collider":"AABBCollider((40,250),rotates=False)"
+        },
+        {
+            "name":"right_wall",
+            "pos":[2024,180],
+            "mass":"inf",
+            "collider":"AABBCollider((40,250),rotates=False)"
+        },
+        {
+            "name":"bottom_wall",
+            "pos":[1024,325],
+            "mass":"inf",
+            "collider":"AABBCollider((2000,40),rotates=False)"
+        },
+        {
+            "name":"top_wall",
+            "pos":[1024,38],
+            "mass":"inf",
+            "collider":"AABBCollider((2000,40),rotates=False)"
+        }
+    ],
+    "behaviours": [
+        "SaveEntities",
+        "CameraFollowPlayer"
+    ]
+}

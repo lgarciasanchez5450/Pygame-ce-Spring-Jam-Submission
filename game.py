@@ -1,6 +1,7 @@
 import sys
 import gui
 import time
+import Input
 import Utils
 import debug
 import Async
@@ -33,7 +34,7 @@ class Game:
 
     def spawnEntity(self,entity:Entity):
         if entity.dirty:
-            entity.regenerate_physics()
+            entity.clean()
             entity.dirty = False
         self.to_spawn.append(entity)
 
@@ -55,10 +56,6 @@ class Game:
         self.game_manager.start_game()
         self.screen_rect = pygame.Rect(0,0,self.window.size[0],self.window.size[1])
         screen = self.window.get_surface()
-        self.entities.extend(self.to_spawn)
-        self.to_spawn.clear()
-        for e in self.entities:
-            e.start(self)
         physics_last_state = physics.PhysicsState.new()
         while True:
             if __debug__:
@@ -66,6 +63,7 @@ class Game:
                     debug.Profile.active = False
             t_start = time.perf_counter()
             self.time = time.perf_counter()
+            Input._update()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit(0)
@@ -81,6 +79,8 @@ class Game:
                      
             self.game_manager.pre_update()
             self.entities.extend(self.to_spawn)
+            for ent in self.to_spawn:
+                ent.start(self)
             self.to_spawn.clear()
             map = build_map_better(self.entities)
             ### Update All Entities ###
@@ -119,9 +119,10 @@ class Game:
                     if e.surf:
                         s = glm.vec2(e.surf.get_size())/2
                         screen.blit(e.surf,e.pos-s-self.camera_pos+self.half_screen_size)
-                    if f3_mode:
+                    if __debug__ and f3_mode:
                         olist = col.mask.outline()
-                        pygame.draw.lines(screen,(200,150,150),1,[(glm.floor(col.rect.topleft - self.camera_pos + self.half_screen_size + (x,y))) for x,y in olist])
+                        if len(olist) > 1:
+                            pygame.draw.lines(screen,(200,150,150),1,[(glm.floor(col.rect.topleft - self.camera_pos + self.half_screen_size + (x,y))) for x,y in olist])
                         pygame.draw.rect(screen,(200,150,150),col.rect.move(glm.floor(-self.camera_pos+self.half_screen_size)),1)
             if __debug__ and debug.Profile.active:
                 t_g = time.perf_counter()
@@ -141,8 +142,6 @@ class Game:
             self.frame += 1
 
             if __debug__:
-                if f3_mode:
-                    screen.blit(dbg_font.render(f'{self.camera_pos.x:.0f}/{self.camera_pos.y:.0f}',True,'white'))
                 if debug.Profile.active:
                     tot = t_end-t_start
                     print(f'Input+Pre Update:   {Utils.formatTime(t_a-build_map_better.last_timed-t_start,format='6.2f')} ({100*(t_a-build_map_better.last_timed-t_start)/tot:.1f}%)',)
@@ -178,6 +177,8 @@ class Game:
                 if e.name == name:
                     ents.append(e)
         return ents
+
+
 
 if __name__ == '__main__':
     print('!!Debug Only!!')

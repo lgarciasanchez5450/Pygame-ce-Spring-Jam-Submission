@@ -37,18 +37,9 @@
             ],
             "surf_path":"./Images/Game/Crates/Wooden.png",
             "behaviours": [
-                "SceneTransporter('docks')"
+                "ActionTriggerInteract('go')",
+                "SceneTransporter('go','docks')"
             ]
-        },
-        {
-            "name":"InteractNotifier",
-            "pos":[300,300],
-            "vel":[0,0],
-            "mass":1,
-            "rot":0,
-            "rot_vel":0,
-            "surf_path":"./Images/Game/UI/key_down.png",
-            "collider":"AABBCollider((1,1),isTrigger=True)"
         },
         {
             "name":"TextTriggerThingy",
@@ -63,7 +54,7 @@
             ],
             "surf_path":"./Images/Game/Crates/Wooden.png",
             "behaviours": [
-                "ActionTriggerOnEnter('FirstDialogue')",
+                "ActionTriggerInteract('FirstDialogue',offset=(0,-20))",
                 "Dialogue('FirstDialogue',[('Hello!!!',10),('My Name is TextTriggerThingy!',20)])"
             ]
         },
@@ -71,25 +62,25 @@
             "name":"left_wall",
             "pos":[24,256],
             "mass":"inf",
-            "collider":"AABBCollider((40,400))"
+            "collider":"AABBCollider((40,400),rotates=False)"
         },
         {
             "name":"right_wall",
             "pos":[1000,256],
             "mass":"inf",
-            "collider":"AABBCollider((40,400))"
+            "collider":"AABBCollider((40,400),rotates=False)"
         },
         {
             "name":"bottom_wall",
             "pos":[512,472],
             "mass":"inf",
-            "collider":"AABBCollider((950,40))"
+            "collider":"AABBCollider((950,40),rotates=False)"
         },
         {
             "name":"top_wall",
             "pos":[512,39],
             "mass":"inf",
-            "collider":"AABBCollider((950,40))"
+            "collider":"AABBCollider((950,40),rotates=False)"
         }
     ],
     "behaviours": [

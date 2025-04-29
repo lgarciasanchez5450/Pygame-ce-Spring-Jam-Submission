@@ -4,7 +4,7 @@ from .Action import Action
 class ActionTrigger(Behaviour):
     action:str
     action_b:Action
-    __slots__ = 'action','behaviour'
+    __slots__ = 'action','behaviour','action_b'
     def __init__(self,action:str):
         self.action = action
         

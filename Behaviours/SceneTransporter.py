@@ -1,30 +1,14 @@
-from .Behaviour import *
+from .Action import *
 from gametypes import *
 
-class SceneTransporter(Behaviour):
+class SceneTransporter(Action):
     __slots__ = 'dest','collider_index','collider'
-    def __init__(self,destination_scene:str,collider:int=-1):
+    def __init__(self,name:str,destination_scene:str):
+        super().__init__(name)
         self.dest = destination_scene
-        self.collider_index = collider
-    
-    def start(self, gameObject:EntityType, game:GameType):
-        if self.collider_index == -1:
-            for c in gameObject.colliders:
-                if c.isTrigger:
-                    self.collider = c
-                    break
-            else:
-                raise RuntimeError(f'No trigger collider found for entity: {gameObject.name}')
-        else:
-            self.collider = gameObject.colliders[self.collider_index]
-            if not self.collider.isTrigger:
-                raise RuntimeError(f'Specified collider not trigger for entity: {gameObject.name}')
-            
-    
 
-    def onTriggerEnter(self, gameObject:EntityType, other:EntityType,game:GameType):
-        if other.name == 'Player':
-            game.asyncCtx.StartCoroutine(self.goToNextCoroutine(gameObject,game))
+    def Run(self, gameObject:EntityType,game:GameType):
+        game.asyncCtx.StartCoroutine(self.goToNextCoroutine(gameObject,game))
 
     def goToNextCoroutine(self,gameObject:EntityType,game:GameType):
         import Async

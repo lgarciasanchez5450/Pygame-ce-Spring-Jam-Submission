@@ -42,7 +42,7 @@ class GameManager:
 
 
     def start_game(self):
-        self.scene = self.scenes['living_quarters']
+        self.scene = self.scenes['hallway']
         self.scene.start(self.game)
 
     def pre_update(self): ...
@@ -50,6 +50,7 @@ class GameManager:
     def post_update(self,map:MapType): ...
 
     def pre_draw(self):
+        self.screen.fill('black')
         self.scene.preDraw(self.game)
         game = self.game
         game.screen_rect.center = game.camera_pos
@@ -60,18 +61,20 @@ class GameManager:
         self.screen.blit(self.scene.map,glm.floor(game.half_screen_size - game.camera_pos))
 
     def ui_draw(self): 
-        if (d:= self.dialogue_manager.getText(self.game.time)) is not None:
+        if (d:= self.dialogue_manager.getText(self.game.dt)) is not None:
             dialogue_rect = d.get_rect()
             dialogue_rect.centerx = self.screen.get_width()//2
             dialogue_rect.bottom = self.screen.get_height() - 50
-            pygame.draw.rect(self.screen,'gray',dialogue_rect.inflate(10,4),0,2)
+            border_rect = dialogue_rect.inflate(10,8).move(0,-2)
+            pygame.draw.rect(self.screen,(120,120,120),border_rect,0,2)
+            pygame.draw.rect(self.screen,(190,190,190),border_rect,1,2)
             self.screen.blit(d,dialogue_rect)
         self.scene.postDraw(self.game)
 
     #Public Utility Methods
 
     def PopDialogue(self,dialogue:tuple[str,float]|None):
-        self.dialogue_manager.setCurrentDialogue(dialogue,self.game.time)
+        return self.dialogue_manager.setCurrentDialogue(dialogue)
 
     def StartScene(self,scene:Scene):
         if self.scene is scene:

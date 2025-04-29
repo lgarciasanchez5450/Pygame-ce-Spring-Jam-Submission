@@ -22,13 +22,25 @@ try:
 except IndexError:
     action = 'make'
 
-
-if action == 'clean':
+if action == '-h':
+    print('''
+USAGE:
+    py make.py [action]
+          
+where 
+    action          Action to take regarding the compilation and configuration of the project
+    
+    Options:
+        make        Compile Project using Pyinstaller to root dir as "game.exe" [Default Option]
+        clean       Clean Root Directory and all subdirs of compilation intermediary leftovers
+        -h          Show this message
+''')
+elif action == 'clean':
     try:shutil.rmtree('./dist')
     except:pass
     try:shutil.rmtree('./build')
     except:pass
-    try:os.remove('game.spec')
+    try:os.remove('main.spec')
     except:pass
 elif action == 'make':
     print('Building Executable (Pyinstaller)')
@@ -39,7 +51,7 @@ elif action == 'make':
         sys.exit(1)
     print('Successfully Built Executable')
     try:
-        os.replace('dist/game.exe','game.exe')
+        os.replace('dist/main.exe','game.exe')
     except FileNotFoundError:
         print("Error Moving Executable. Check dist/game.exe for executable")
         sys.exit(1)
