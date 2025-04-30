@@ -2,7 +2,7 @@
     "map_path":"./Images/Game/Maps/hallway.png",
     "entities": [
         {
-            "name":"box1",
+            "name":"left_door",
             "pos":[24,182],
             "vel":[0,0],
             "mass":1,
@@ -11,6 +11,7 @@
             "collider":"AABBCollider((60,60),isTrigger=True,layers=2)",
             "behaviours":[
                 "SceneTransporter('rm-left','living_quarters')",
+                "MoveEntities('move player',[('Player',(100,100))])",
                 "ActionTriggerInteract('rm-left',offset=(0,-45))"
             ]
         },
@@ -22,10 +23,20 @@
             "rot":0,
             "rot_vel":0,
             "collider":"MaskCollider(layers=3)",
-            "surf_path":"./Images/Game/Player/head.png",
+            "surf_path":"./Images/Game/Player/head22.png",
             "behaviours": [
                 "PlayerController"
             ]
+        },
+        {
+            "name":"crate",
+            "pos":[500,150],
+            "vel":[0,0],
+            "mass":1,
+            "rot":0,
+            "rot_vel":0,
+            "collider":"MaskCollider",
+            "surf_path":"./Images/Game/Crates/Wooden.png"
         },
         {
             "name":"left_wall",
@@ -53,7 +64,7 @@
         }
     ],
     "behaviours": [
-        "SaveEntities",
+        "SaveEntities(exceptions={'Player':'ignore'})",
         "CameraFollowPlayer"
     ]
 }

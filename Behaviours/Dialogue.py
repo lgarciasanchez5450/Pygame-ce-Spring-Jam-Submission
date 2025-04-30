@@ -6,15 +6,15 @@ import Input
 
 class Dialogue(Action):
     __slots__ = 'dialogue',
-    def __init__(self,name:str,dialogue:list[tuple[str,float]]):
-        super().__init__(name)
+    def __init__(self,name:str,dialogue:list[tuple[str,float]],*,next:str|None=None):
+        super().__init__(name,next=next)
         self.dialogue = dialogue
 
     def Run(self, gameObject, game:GameType):
         self.running = True
-        game.asyncCtx.StartCoroutine(self.doDialogueCoro(game))
+        game.asyncCtx.StartCoroutine(self.doDialogueCoro(gameObject,game))
 
-    def doDialogueCoro(self,game:GameType):
+    def doDialogueCoro(self,gameObject,game:GameType):
 
         i = 0
         while i < len(self.dialogue):
@@ -30,5 +30,6 @@ class Dialogue(Action):
             i += 1
         game.game_manager.PopDialogue(None)
         yield
+        self.RunNextAction(gameObject,game)
         self.running = False
 

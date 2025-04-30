@@ -12,19 +12,6 @@
             "surf_path":"./Images/Game/Crates/Wooden.png"
         },
         {
-            "name":"Player",
-            "pos":[400,300],
-            "vel":[0,0],
-            "mass":1,
-            "rot":0,
-            "rot_vel":0,
-            "collider":"MaskCollider(layers=3)",
-            "surf_path":"./Images/Game/Player/head.png",
-            "behaviours": [
-                "PlayerController"
-            ]
-        },
-        {
             "name":"TriggerThingy",
             "pos":[380,450],
             "vel":[0,0],

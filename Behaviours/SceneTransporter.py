@@ -1,24 +1,25 @@
+import Async
+import pygame
+from pyglm import glm
+from Utils import easing
 from .Action import *
 from gametypes import *
+from gui.utils.utils import lerp        
+from .SceneBehaviours.CameraFollowPlayer import CameraFollowPlayer
 
 class SceneTransporter(Action):
-    __slots__ = 'dest','collider_index','collider'
-    def __init__(self,name:str,destination_scene:str):
-        super().__init__(name)
+    __slots__ = 'dest','collider_index','collider','force_next'
+    def __init__(self,name:str,destination_scene:str,*,next:str|None=None,force_next:bool=False):
+        super().__init__(name,next=next)
         self.dest = destination_scene
+        self.force_next = force_next
+        
 
     def Run(self, gameObject:EntityType,game:GameType):
         game.asyncCtx.StartCoroutine(self.goToNextCoroutine(gameObject,game))
 
     def goToNextCoroutine(self,gameObject:EntityType,game:GameType):
-        import Async
-        import pygame
-        from pyglm import glm
-        from Utils import easing
-        from gui.utils.utils import lerp        
-        from .SceneBehaviours.CameraFollowPlayer import CameraFollowPlayer
         screen = game.window.get_surface()
-
         cfp = game.game_manager.scene.GetBehaviour(CameraFollowPlayer)
         if cfp is None:
             return None
@@ -28,7 +29,6 @@ class SceneTransporter(Action):
         player,cfp.player = cfp.player,FakeEntity()
         start_pos = glm.vec2(player.pos)
         end_pos = glm.vec2(gameObject.pos)
-
 
         #Move Camera to SceneTransporter object
         timer = Async.Timer(2,game)
@@ -46,13 +46,16 @@ class SceneTransporter(Action):
             yield
 
         #stay black for 1 seconds
-        
+        screen.fill((0,0,0))        
+        yield
         timer =  Async.Timer(1,game)
         timer.start()
+        gm = game.game_manager
+        gm.StartScene(gm.scenes[self.dest])
+        cfp.player = player
+        self.RunNextAction(gameObject,game,even_if_already_running=self.force_next)
         while timer.isRunning():
             screen.fill((0,0,0))
-            cfp.player = player
-            game.game_manager.game.game_manager.game.game_manager.game.game_manager.game.game_manager.game.game_manager.game.game_manager.StartScene(game.game_manager.scenes[self.dest])
             yield
         
         timer = Async.Timer(2,game)

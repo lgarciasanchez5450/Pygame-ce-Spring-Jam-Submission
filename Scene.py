@@ -20,28 +20,35 @@ class Scene:
     behaviours:list[SceneBehaviour]
 
     def __init__(self,path:str):
-        with open(path,'r') as file:
-            map_data:dict = json.load(file)
-        self.map = ResourceManager.loadOpaque(map_data.pop('map_path'))
-        self.entities = []
-        for ent_data in map_data.pop('entities'):
-            self.entities.append(Loader.loadEntity(ent_data))
-        self.behaviours = []
-        try:
-            s_behavs = map_data.pop('behaviours')
-        except KeyError:
-            s_behavs = []
-        s_behav:list[str]
-        for s_behav in s_behavs:
-            self.behaviours.append(Loader.parseComplexType(s_behav,SceneBehaviour))
-        if map_data: 
-            print(f'[Scene Loading Warning] Scene {path} has unused data: {tuple(map_data.keys())}')
+        try:    
+            with open(path,'r') as file:
+                map_data:dict = json.load(file)
+
+            self.map = ResourceManager.loadOpaque(map_data.pop('map_path'))
+            self.entities = []
+            for ent_data in map_data.pop('entities'):
+                self.entities.append(Loader.loadEntity(ent_data))
+            self.behaviours = []
+            try:
+                s_behavs = map_data.pop('behaviours')
+            except KeyError:
+                s_behavs = []
+            s_behav:list[str]
+            for s_behav in s_behavs:
+                self.behaviours.append(Loader.parseComplexType(s_behav,SceneBehaviour))
+            if map_data: 
+                print(f'[Scene Loading Warning] Scene {path} has unused data: {tuple(map_data.keys())}')
+        except Exception as err:
+            raise RuntimeError('Loading Scene {}\n\t{}'.format(path,' '.join(map(str,err.args))))
+    
 
     def start(self,game:GameType):
         for b in self.behaviours: b.start(self,game)
-
     def update(self,game:GameType):
         for b in self.behaviours: b.update(self,game)
+    def stop(self,game:GameType):
+        for b in self.behaviours: b.stop(self,game)
+
 
     def preDraw(self,game:GameType):
         for b in self.behaviours: b.preDraw(self,game)
@@ -51,6 +58,3 @@ class Scene:
         for b in self.behaviours:
             if type(b) is bt:
                 return b
-
-    def stop(self,game:GameType):
-        for b in self.behaviours: b.stop(self,game)

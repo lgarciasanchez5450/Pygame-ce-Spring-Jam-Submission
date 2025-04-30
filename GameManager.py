@@ -42,7 +42,7 @@ class GameManager:
 
 
     def start_game(self):
-        self.scene = self.scenes['hallway']
+        self.scene = self.scenes['start_cs']
         self.scene.start(self.game)
 
     def pre_update(self): ...

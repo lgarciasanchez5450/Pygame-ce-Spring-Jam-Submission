@@ -1,0 +1,90 @@
+{
+    "map_path":"./Images/Game/Maps/warehouse.png",
+    "entities": [
+        {
+            "name":"TriggerThingy",
+            "pos":[512,512],
+            "vel":[0,0],
+            "mass":1,
+            "rot":0,
+            "rot_vel":0,
+            "colliders":[
+                "MaskCollider(isTrigger=True,layers=4)"
+            ],
+            "surf_path":"./Images/Game/Entities/RedStripes.png",
+            "behaviours": [
+                "ActionTriggerInteract('go')",
+                "SceneTransporter('go','docks')"
+            ]
+        },
+        {
+            "name":"TriggerThingy",
+            "pos":[512,400],
+            "vel":[0,0],
+            "mass":1,
+            "rot":0,
+            "rot_vel":0,
+            "colliders":[
+                "AABBCollider((40,40),isTrigger=True,layers=2)"
+            ],
+            "surf_path":"./Images/Game/Entities/pressure_plate.png",
+            "behaviours": [
+                "ActionTriggerInteract('go',offset=(0,-30))",
+                "Dialogue('go',[('click me!',20)])"
+            ]
+        },
+        {
+            "name":"shape1",
+            "pos":[512,512],
+            "vel":[0,0],
+            "mass":1,
+            "rot":0,
+            "rot_vel":0,
+            "colliders":[
+                "MaskCollider"
+            ],
+            "surf_path":"./Images/Game/Entities/shape_l.png"
+        },
+        {
+            "name":"Player",
+            "pos":[400,300],
+            "vel":[0,0],
+            "mass":1,
+            "rot":0,
+            "rot_vel":0,
+            "collider":"MaskCollider(layers=3)",
+            "surf_path":"./Images/Game/Player/head2.png",
+            "behaviours": [
+                "PlayerController"
+            ]
+        },
+        {
+            "name":"left_wall",
+            "pos":[24,512],
+            "mass":"inf",
+            "collider":"AABBCollider((40,950),rotates=False)"
+        },
+        {
+            "name":"right_wall",
+            "pos":[1000,512],
+            "mass":"inf",
+            "collider":"AABBCollider((40,950),rotates=False)"
+        },
+        {
+            "name":"bottom_wall",
+            "pos":[512,985],
+            "mass":"inf",
+            "collider":"AABBCollider((950,40),rotates=False)"
+        },
+        {
+            "name":"top_wall",
+            "pos":[512,39],
+            "mass":"inf",
+            "collider":"AABBCollider((950,40),rotates=False)"
+        }
+    ],
+    "behaviours": [
+        "SaveEntities",
+        "CameraFollowPlayer"
+    ]
+}

@@ -52,7 +52,7 @@ class Entity:
                  pos:Vec2,vel:Vec2,mass:float,
                  rot:float,rot_vel:float,mo_inertia:float,
                  colliders:list[ColliderType],
-                 _surf:Surface|None,tags:int=0):
+                 _surf:Surface|None,behaviours:list[BehaviourType],tags:int=0):
         self.name = name
         #Translation
         self.pos = pos
@@ -72,7 +72,7 @@ class Entity:
         self.force = glm.vec2()
         self.dirty = True
         self.dead = False
-        self.behaviours = []
+        self.behaviours = behaviours
         self.tags = tags
 
     def start(self,game:GameType):

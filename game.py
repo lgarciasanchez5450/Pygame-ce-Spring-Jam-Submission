@@ -117,8 +117,8 @@ class Game:
             for e in physics.get_colliding(self.screen_rect,map):
                 for col in e.colliders:
                     if e.surf:
-                        s = glm.vec2(e.surf.get_size())/2
-                        screen.blit(e.surf,e.pos-s-self.camera_pos+self.half_screen_size)
+                        s = glm.vec2(e.surf.get_size())//2
+                        screen.blit(e.surf,glm.floor(e.pos-s-(self.camera_pos)+self.half_screen_size))
                     if __debug__ and f3_mode:
                         olist = col.mask.outline()
                         if len(olist) > 1:
@@ -183,6 +183,6 @@ class Game:
 if __name__ == '__main__':
     print('!!Debug Only!!')
     pygame.init()
-    win = pygame.Window('game test',(900,600))#(1920,1080))
+    win = pygame.Window('game test',(1920,1080))
     game = Game(win)
     game.run()

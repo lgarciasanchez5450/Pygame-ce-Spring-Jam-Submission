@@ -87,8 +87,7 @@ def _parseEntityData(data:dict[str,typing.Any]) -> Entity:
     if mass < 1e-6:
         raise ValueError(f'Invalid Mass: {mass}')
     #make entity
-    ent = Entity(name,pos,vel,mass,rot,rot_vel,mo_inertia,colliders,surf)
-    ent.behaviours = behaviours
+    ent = Entity(name,pos,vel,mass,rot,rot_vel,mo_inertia,colliders,surf,behaviours)
     return ent
 
 def parseComplexType(s:str,parentType:type[T],only_subtypes:bool = True) -> T:

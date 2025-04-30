@@ -1,0 +1,28 @@
+{
+    "map_path":"./Images/Game/Maps/warehouse.png",
+    "entities":[
+        {
+            "name":"Uncle Bob",
+            "pos":[120,80],
+            "rot":3.14159265,
+            "surf_path":"./Images/Game/Player/head2.png",
+            "collider":"MaskCollider(isTrigger=True)",
+            "behaviours":[
+                "ActionTriggerOnStart('d1')",
+                "Dialogue('d1',[('Hello!',20)],next='d2')",
+                "Dialogue('d2',[('Glad to see you recovering.',20)])"
+            ]
+        },
+        {
+            "name":"Player",
+            "pos":[80,80],
+            "rot":0,
+            "surf_path":"./Images/Game/Player/head2.png",
+            "collider":"MaskCollider(isTrigger=True)"
+        }
+    ],
+    "behaviours":[
+        "SaveEntities",
+        "CameraFollowPlayer"
+    ]
+}

@@ -321,3 +321,10 @@ def parseFuncArgsContainer(container:SContainerType) -> tuple[tuple[typing.Any],
                 value = parseTokensNonContainer(value)
             kwargs[key] = value
     return tuple(args),kwargs    
+
+
+def angleDifference(target_angle:float,current_angle:float):
+    d_rot = (target_angle - current_angle) % 6.283185307179586
+    if d_rot > 3.141592653589793:
+        d_rot -= 6.283185307179586
+    return d_rot
