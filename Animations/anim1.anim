@@ -1,9 +1,0 @@
-[
-    {
-        "variable":"pos",
-        "t_start":0,
-        "t_end":1,
-        "animation":"lerp",
-        "args":[(0,0),(1,0)],
-    }
-]

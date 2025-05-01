@@ -145,9 +145,11 @@ def containerize(tokens:list[str],containers:dict[str,str]) -> SContainerType:
             else:
                 inside_tokens.append(cur_token)
             i+=1
-
-    return _containerize()                
-
+    try:
+        return _containerize()                
+    except Exception as err:
+        err.add_note('Error containerizing token: {}'.format(tokens))
+        raise
     
 def prettyPrintContainers(container:SContainerType,tabs=0):
     typ,tokens = container
@@ -328,3 +330,5 @@ def angleDifference(target_angle:float,current_angle:float):
     if d_rot > 3.141592653589793:
         d_rot -= 6.283185307179586
     return d_rot
+
+

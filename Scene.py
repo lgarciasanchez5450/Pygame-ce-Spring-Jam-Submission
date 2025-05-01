@@ -21,7 +21,7 @@ class Scene:
 
     def __init__(self,path:str):
         try:    
-            with open(path,'r') as file:
+            with open(path,'r',encoding='utf-8') as file:
                 map_data:dict = json.load(file)
 
             self.map = ResourceManager.loadOpaque(map_data.pop('map_path'))
@@ -39,7 +39,8 @@ class Scene:
             if map_data: 
                 print(f'[Scene Loading Warning] Scene {path} has unused data: {tuple(map_data.keys())}')
         except Exception as err:
-            raise RuntimeError('Loading Scene {}\n\t{}'.format(path,' '.join(map(str,err.args))))
+            err.add_note("Error Loading Scene {}".format(path))
+            raise err
     
 
     def start(self,game:GameType):

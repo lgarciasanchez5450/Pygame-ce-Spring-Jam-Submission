@@ -17,6 +17,7 @@ def getKeyPressed(key:int):
     return _kp[key]
 
 def getKeyJustPressed(key:int):
+
     global _kd
     return _kd[key]
 

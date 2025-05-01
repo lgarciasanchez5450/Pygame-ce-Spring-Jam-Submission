@@ -88,6 +88,7 @@ class Game:
                 t_a = time.perf_counter()
             for e in self.entities:
                 e.update(map, self.dt, self)
+            self.game_manager.update()
             if __debug__ and debug.Profile.active:
                 t_b = time.perf_counter()
             self.game_manager.post_update(map)
@@ -131,12 +132,9 @@ class Game:
                 t_h = time.perf_counter()
             ### Update Coroutines ###
             self.asyncCtx.update(self.time,self.frame)
-            
-        
             t_end = time.perf_counter()
             self.window.flip()
             t_final = time.perf_counter()
-            # self.window.title = f'{(1/(t_final-t_start)):.2f} FPS  {1000*(t_final-t_end):.2f} ms' 
             dt = self.clock.tick(120) 
             self.dt  = dt / 1000
             self.frame += 1
@@ -183,6 +181,7 @@ class Game:
 if __name__ == '__main__':
     print('!!Debug Only!!')
     pygame.init()
+    # win = pygame.Window('game test',(900,600))#(1920,1080))
     win = pygame.Window('game test',(1920,1080))
     game = Game(win)
     game.run()

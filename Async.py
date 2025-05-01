@@ -10,6 +10,10 @@ class Timer:
         self.start_time = self.game.time
         self.stop_time = self.game.time + self.time
 
+    @property
+    def running(self):
+        return self.isRunning()
+
     def isRunning(self):
         return self.game.time <= self.stop_time
     

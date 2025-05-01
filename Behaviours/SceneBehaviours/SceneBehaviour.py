@@ -7,7 +7,6 @@ class SceneBehaviour:
             raise NameError(f'Behaviour {cls} conflicts with another. Maybe two behaviours have the same name? (<- this cannot happen)')
         SceneBehaviour._subclasses_[name] = cls
         
-
     __slots__ = ()
 
     def start(self,scene:SceneType,game:GameType): ...

@@ -15,10 +15,11 @@ class Dialogue(Action):
         game.asyncCtx.StartCoroutine(self.doDialogueCoro(gameObject,game))
 
     def doDialogueCoro(self,gameObject,game:GameType):
-
+        gm= game.game_manager
+        scene = gm.scene
         i = 0
         while i < len(self.dialogue):
-            dialogue_state = game.game_manager.PopDialogue(self.dialogue[i])
+            dialogue_state = gm.PopDialogue(self.dialogue[i])
             yield
             while True:
                 if Input.getKeyJustPressed(Input.K_SPACE):
@@ -26,9 +27,13 @@ class Dialogue(Action):
                         dialogue_state.done = True
                     elif dialogue_state.done:
                         break
+                if gm.scene is not scene:
+                    gm.PopDialogue(None)
+                    self.running = False
+                    return
                 yield
             i += 1
-        game.game_manager.PopDialogue(None)
+        gm.PopDialogue(None)
         yield
         self.RunNextAction(gameObject,game)
         self.running = False

@@ -23,7 +23,7 @@
             "rot":0,
             "rot_vel":0,
             "collider":"MaskCollider(layers=3)",
-            "surf_path":"./Images/Game/Player/head22.png",
+            "surf_path":"./Images/Game/Player/head2.png",
             "behaviours": [
                 "PlayerController"
             ]

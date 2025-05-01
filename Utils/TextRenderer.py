@@ -70,13 +70,11 @@ class TextRenderer:
                     rich_line.append(RichCharacter('§',color))
                 elif code_prefix == '§C':
                     args = line[:3]
-                    print('args:',args)
+                    line = line[3:]
                     try:
                         color = b36_to_color(args)
                     except:
                         rich_line.extend(map(lambda s:RichCharacter(s,color),code_prefix+args))
-                    finally:
-                        line = line[3:]
                 else:
                     rich_line.append(RichCharacter(code_prefix[0],color))
                     if len(code_prefix) == 2:
@@ -87,7 +85,8 @@ class TextRenderer:
         surfs = self.render(text)
         if len(surfs) == 0: return Surface((0,0))
         if len(surfs) == 1: return surfs[0]
-        big_surf = Surface((max(surf.get_width() for surf in surfs),sum(surf.get_height() for surf in surfs)))
+
+        big_surf = Surface((max(surf.get_width() for surf in surfs),sum(surf.get_height() for surf in surfs)),const.SRCALPHA)
         y_offset = 0
         for surf in surfs:
             big_surf.blit(surf,(((big_surf.get_width()-surf.get_width())*align).__trunc__(),y_offset))
@@ -102,6 +101,7 @@ class TextRenderer:
             if not rich_line:
                 line_renders.append(Surface((1,self.font.get_height()),const.SRCCOLORKEY))
                 line_renders[-1].set_colorkey((0,0,0))
+                continue
             surf = Surface(self.font.size(''.join([rc.char for rc in rich_line])),const.SRCALPHA)
             if GROUP_SIMILAR:
                 t_line = []

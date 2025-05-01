@@ -2,11 +2,16 @@ from . import ActionTriggerInteract
 from . import ActionTriggerOnEnter
 from . import ActionTriggerOnLeave
 from . import ActionTriggerOnStart
+from . import RunExternalAction
+from . import AnimationSequence
 from . import PlayerController
 from . import SceneTransporter
 from . import InteractNotifier
+from . import RobotController
 from . import MoveEntities
 from . import RunParallel
+from . import FollowPath
 from . import WaitAction
+from . import Animation
 from . import Behaviour
 from . import Dialogue

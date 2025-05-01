@@ -1,32 +1,23 @@
 import math
 import Utils
-import pygame
 from pyglm import glm
 from gametypes import *
 from Behaviours.Behaviour import Behaviour
 
-class PlayerController(Behaviour):
+class RobotController(Behaviour):
     camera_pos:Vec2        
-    active:bool
-
-    def start(self, gameObject, game:GameType):
-        self.active = True
+    def start(self, gameObject:EntityType, game:GameType):
         self.camera_pos = game.camera_pos
-        self.target_rot = 0
+        self.target_rot = None
+        self.dir = glm.vec2()
 
+
+    def Move(self,dir:Vec2):
+        self.dir = glm.vec2(dir)
 
     def update(self, gameObject:EntityType, map, dt:float, game:GameType):
-        if not self.active:return
-        keys = pygame.key.get_pressed()
-        mouse_pressed = pygame.mouse.get_pressed()
-        mouse_pos = pygame.mouse.get_pos()
-        # updating forwards and backwards + velocity movement
-        movement = glm.vec2(
-                    keys[pygame.K_d] - keys[pygame.K_a],
-                    keys[pygame.K_s] - keys[pygame.K_w],
-                )
-        
-        gameObject.vel += movement * 500 * dt# * gameObject.mass * 20
+        movement = self.dir
+        gameObject.vel += movement * 500 * dt
 
         if movement.x or movement.y:
             self.target_rot = math.atan2(-movement.y,movement.x)
@@ -42,7 +33,7 @@ class PlayerController(Behaviour):
                 t = 0.1
                 accel = 2 * (delta_rotation - gameObject.rot_vel * t) / (t*t)
                 gameObject.rot_vel += dt * accel
+                
 
     def onCollide(self, gameObject, other):
         self.target_rot = None
-

@@ -2,15 +2,43 @@
     "map_path":"./Images/Game/Maps/warehouse.png",
     "entities":[
         {
+            "name":"destruction_circle",
+            "pos":[512,512],
+            "vel":[0,0],
+            "mass":1,
+            "rot":0,
+            "rot_vel":0,
+            "colliders":[
+                "MaskCollider(isTrigger=True,layers=4)"
+            ],
+            "surf_path":"./Images/Game/Entities/RedStripes.png"
+        },
+        {
             "name":"Uncle Bob",
             "pos":[120,80],
             "rot":3.14159265,
-            "surf_path":"./Images/Game/Player/head2.png",
+            "surf_path":"./Images/Game/Entities/head_blue.png",
             "collider":"MaskCollider(isTrigger=True)",
             "behaviours":[
+                "RobotController",
                 "ActionTriggerOnStart('d1')",
-                "Dialogue('d1',[('Hello!',20)],next='d2')",
-                "Dialogue('d2',[('Glad to see you recovering.',20)])"
+                "Dialogue('d1',[('Hello!',20),('Glad to see you recovering',20),('Recieved a nasty hit in the head, didnt ya!',20),('Oh,          \nYou dont remember who you are?',20),('You are a sentient roomba on legs! Hah!',20),('Anyways, we have to get back to work!\nQuick before §Cz00boss§Czzz catches us slacking!',30)],next='end')",
+                "RunExternalAction('end','Boss Meanie','start',next='start working')",
+                "FollowPath('start working',[(800,80)])"
+            ]
+        },
+        {
+            "name":"Boss Meanie",
+            "pos":[300,600],
+            "rot":1.5707963267948966,
+            "surf_path":"./Images/Game/Entities/boss_head.png",
+            "collider":"MaskCollider",
+            "behaviours":[
+                "RobotController",
+                "FollowPath('start',[110,110],next='d1')",
+                "Dialogue('d1',[('§Cf00Hey You!',20),('§Cf00What do you think your doing?!',12),('Uhh..',5),('Sorry, sir..',10),('§Cf99Ughh... ',20),('§Ce99Youre lucky im feeling tired today.',12),('§Ce99Just get back to work',14)],next='go_back')",
+                "FollowPath('go_back',[(300,600)],next='go_to_warehouse')",
+                "RunExternalAction('go_to_warehouse','Player','go_to_warehouse')"
             ]
         },
         {
@@ -18,11 +46,15 @@
             "pos":[80,80],
             "rot":0,
             "surf_path":"./Images/Game/Player/head2.png",
-            "collider":"MaskCollider(isTrigger=True)"
+            "collider":"MaskCollider(isTrigger=True)",
+            "behaviours":[
+                "SceneTransporter('go_to_warehouse','warehouse')"
+            ]
         }
     ],
     "behaviours":[
         "SaveEntities",
-        "CameraFollowPlayer"
+        "CameraFollowPlayer",
+        "SkipScene('c','warehouse',0.5,location=(1,0),offset=(-10,10),font_size=30,alphas={'inactive':80,'active':200})"
     ]
 }

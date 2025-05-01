@@ -35,6 +35,7 @@ class DialogueManager:
         next_state = DialogueState()
         next_state.running = True
         self.current_state = next_state
+        self.last_chars = None
         return next_state
 
     def getText(self,dt:float):
@@ -54,7 +55,7 @@ class DialogueManager:
             if chars == len(self.current_dialogue):
                 state.done = True
                 state.running = False
-
+            self.last_chars = chars
         return self._cached_text_surf
 
         

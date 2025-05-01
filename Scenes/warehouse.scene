@@ -2,7 +2,7 @@
     "map_path":"./Images/Game/Maps/warehouse.png",
     "entities": [
         {
-            "name":"TriggerThingy",
+            "name":"DumpArea",
             "pos":[512,512],
             "vel":[0,0],
             "mass":1,
@@ -13,12 +13,13 @@
             ],
             "surf_path":"./Images/Game/Entities/RedStripes.png",
             "behaviours": [
-                "ActionTriggerInteract('go')",
-                "SceneTransporter('go','docks')"
+                "Animation('open',dir='./Images/Game/Entities/DumpOpen',fps=40)",
+                "Animation('close',dir='./Images/Game/Entities/DumpOpen',fps=40,reverse=True)",
+                "AnimationSequence('cycle',['open',0.5,'close'])"
             ]
         },
         {
-            "name":"TriggerThingy",
+            "name":"PackageButton",
             "pos":[512,400],
             "vel":[0,0],
             "mass":1,
@@ -30,7 +31,7 @@
             "surf_path":"./Images/Game/Entities/pressure_plate.png",
             "behaviours": [
                 "ActionTriggerInteract('go',offset=(0,-30))",
-                "Dialogue('go',[('click me!',20)])"
+                "RunExternalAction('go','DumpArea','cycle')"
             ]
         },
         {
@@ -47,7 +48,7 @@
         },
         {
             "name":"Player",
-            "pos":[400,300],
+            "pos":[80,80],
             "vel":[0,0],
             "mass":1,
             "rot":0,
@@ -56,6 +57,36 @@
             "surf_path":"./Images/Game/Player/head2.png",
             "behaviours": [
                 "PlayerController"
+            ]
+        },
+        {
+            "name":"Uncle Bob",
+            "pos":[931,260],
+            "rot":-1.5707963267948966,
+            "mass":"inf",
+            "surf_path":"./Images/Game/Entities/head_blue.png",
+            "collider":"MaskCollider"
+        },
+        {
+            "name":"Workspace1",
+            "pos":[931,300],
+            "rot":0,
+            "mass":"inf",
+            "surf_path":"./Images/Game/Entities/damaged_table.png",
+            "collider":"MaskCollider"
+        },
+        {
+            "name":"Boss Meanie",
+            "pos":[300,925],
+            "rot":1.5707963267948966,
+            "surf_path":"./Images/Game/Entities/boss_head.png",
+            "colliders":[
+                "MaskCollider",
+                "BoxCollider((40,40),isTrigger=True,layers=2)"
+            ],
+            "behaviours":[
+                "ActionTriggerInteract('talk',offset=(0,-30))",
+                "Dialogue('talk',[('Hey what are you doing!',20),('Go Back to your station!',20)])"
             ]
         },
         {

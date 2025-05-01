@@ -47,6 +47,9 @@ class GameManager:
 
     def pre_update(self): ...
 
+    def update(self):
+        self.scene.update(self.game)
+
     def post_update(self,map:MapType): ...
 
     def pre_draw(self):
