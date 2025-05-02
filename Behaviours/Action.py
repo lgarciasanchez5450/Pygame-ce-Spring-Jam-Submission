@@ -7,6 +7,12 @@ class Action(Behaviour):
         self.running = False
         self.next = next
 
+    def FindAction(self,gameObject:EntityType,type:type['Action'],name:str):
+        for action in gameObject.getBehaviours(type):
+            if action.name == name:
+                return action
+        raise LookupError(f'Unable to find {type} of name {name} in entity {gameObject}')
+
     def RunNextAction(self,gameObject:EntityType,game:GameType,*,even_if_already_running:bool = False):
         if self.next is not None:
             n = self.getNext(gameObject)

@@ -8,6 +8,7 @@ from . import PlayerController
 from . import SceneTransporter
 from . import InteractNotifier
 from . import RobotController
+from . import DumpBehaviour
 from . import MoveEntities
 from . import RunParallel
 from . import FollowPath

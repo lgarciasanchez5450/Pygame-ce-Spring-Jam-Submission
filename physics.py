@@ -162,17 +162,36 @@ def resolveCollision(a:EntityType,b:EntityType,info:CollisionInfo,normal:Vec2,dt
             print('\tpos:',b.pos)
             print('\trot:',b.rot)
         
-def get_colliding(r:Rect,map:MapType):
+def get_colliding(r:Rect,map:MapType,layers:int=1,collideTriggers:bool=False):
     s = set()
     _cr = r.colliderect
     for cpos in collide_chunks2d(r.left,r.top,r.right,r.bottom,GameConstants.CHUNK_SIZE):
         if cols:=map.get(cpos):
             for other in cols:
+                if not (other.layers & layers): continue
+                if other.isTrigger and not collideTriggers: continue
                 ent = other.gameObject
                 if ent not in s and _cr(other.rect):
                     s.add(ent)
                     yield ent
                     
+def get_contained(r:Rect,map:MapType,layers:int=1,collideTriggers:bool=False):
+    s = set()
+    _cr = r.colliderect
+    _c = r.contains
+    for cpos in collide_chunks2d(r.left,r.top,r.right,r.bottom,GameConstants.CHUNK_SIZE):
+        if cols:=map.get(cpos):
+            for other in cols:
+                if not (other.layers & layers): continue
+                if other.isTrigger and not collideTriggers: continue
+                ent = other.gameObject
+                if _cr(other.rect) and ent not in s:
+                    assert isinstance(other,MaskCollider)
+                    if _c(other.rect) or all(_c(rect.move(other.rect.topleft)) for rect in other.mask.get_bounding_rects()):
+                        s.add(ent)
+                        yield ent
+
+
 def collide_chunks2d(x1:float,y1:float,x2:float,y2:float,chunk_size:int):
     cx1 = (x1 // chunk_size).__floor__()
     cy1 = (y1 // chunk_size).__floor__()

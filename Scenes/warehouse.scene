@@ -15,7 +15,7 @@
             "behaviours": [
                 "Animation('open',dir='./Images/Game/Entities/DumpOpen',fps=40)",
                 "Animation('close',dir='./Images/Game/Entities/DumpOpen',fps=40,reverse=True)",
-                "AnimationSequence('cycle',['open',0.5,'close'])"
+                "DumpBehaviour('dump',open_anim='open',close_anim='close')"
             ]
         },
         {
@@ -27,24 +27,24 @@
             "rot_vel":0,
             "colliders":[
                 "AABBCollider((40,40),isTrigger=True,layers=2)"
-            ],
+            ], 
             "surf_path":"./Images/Game/Entities/pressure_plate.png",
             "behaviours": [
                 "ActionTriggerInteract('go',offset=(0,-30))",
-                "RunExternalAction('go','DumpArea','cycle')"
+                "RunExternalAction('go','DumpArea','dump')"
             ]
         },
         {
             "name":"shape1",
             "pos":[512,512],
             "vel":[0,0],
-            "mass":1,
+            "mass":0.1,
             "rot":0,
             "rot_vel":0,
             "colliders":[
-                "MaskCollider"
+                "MaskCollider(layers=5)"
             ],
-            "surf_path":"./Images/Game/Entities/shape_l.png"
+            "surf_path":"./Images/Game/Entities/Borken1.png"
         },
         {
             "name":"Player",
@@ -74,6 +74,14 @@
             "mass":"inf",
             "surf_path":"./Images/Game/Entities/damaged_table.png",
             "collider":"MaskCollider"
+        },
+        {
+            "name":"Workspace1_Paper",
+            "pos":[950,300],
+            "rot":-2.9,
+            "mass":"inf",
+            "surf_path":"./Images/Game/Entities/smol_paper.png",
+            "collider":"AABBCollider((1,1),rotates=False,layers=2,isTrigger=True)"
         },
         {
             "name":"Boss Meanie",

@@ -133,3 +133,5 @@ class Entity:
 
 
 
+    def __repr__(self):
+        return f'<Entity object {self.name} at {hex(id(self))}>'

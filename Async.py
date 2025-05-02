@@ -5,6 +5,7 @@ class Timer:
     def __init__(self,time:float,game:GameType):
         self.time = time
         self.game = game
+        self.start_time = None
     
     def start(self):
         self.start_time = self.game.time
@@ -17,8 +18,12 @@ class Timer:
     def isRunning(self):
         return self.game.time <= self.stop_time
     
+    def isDone(self):
+        if self.start_time is None: return False
+        return self.game.time > self.stop_time
+    
     def getTimePassed(self):
-        return self.game.time - self.start_time
+        return self.game.time - self.start_time #type: ignore
 
     def getTimePassedPercent(self):
         return self.getTimePassed() / self.time

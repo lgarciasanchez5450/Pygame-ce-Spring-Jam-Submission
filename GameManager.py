@@ -57,10 +57,6 @@ class GameManager:
         self.scene.preDraw(self.game)
         game = self.game
         game.screen_rect.center = game.camera_pos
-        # for cpos in physics.collide_chunks2d(game.screen_rect.left,game.screen_rect.top,game.screen_rect.right,game.screen_rect.bottom,BG_CHUNK_SIZE):
-        #     surf = g_utils.useCache(generate,cpos,self.space_bg)
-        #     self.screen.blit(surf,glm.floor(game.half_screen_size + glm.vec2(cpos) * BG_CHUNK_SIZE - game.camera_pos))
-
         self.screen.blit(self.scene.map,glm.floor(game.half_screen_size - game.camera_pos))
 
     def ui_draw(self): 

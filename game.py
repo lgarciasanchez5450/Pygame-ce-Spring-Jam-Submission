@@ -13,6 +13,7 @@ from EntityTags import *
 from GameConstants import * 
 
 from pygame import Window
+from Particle import Particle
 from Entities.Entity import Entity
 from GameManager import GameManager
 
@@ -21,6 +22,7 @@ class Game:
     def __init__(self,window:Window):
         self.background = {}
         self.entities:list[Entity] = []
+        self.particles:list[Particle] = []
         self.clock = pygame.time.Clock()
         self.window = window
         self.half_screen_size = glm.vec2(window.size) / 2
@@ -37,6 +39,7 @@ class Game:
             entity.clean()
             entity.dirty = False
         self.to_spawn.append(entity)
+
 
     def spawnEntities(self, entities:list[Entity]):
         for entity in entities:
@@ -115,7 +118,7 @@ class Game:
             if __debug__ and debug.Profile.active:
                 t_f = time.perf_counter()
             # Draw All Entities #
-            for e in physics.get_colliding(self.screen_rect,map):
+            for e in physics.get_colliding(self.screen_rect,map,layers=0b111,collideTriggers=True):
                 for col in e.colliders:
                     if e.surf:
                         s = glm.vec2(e.surf.get_size())//2
@@ -125,6 +128,10 @@ class Game:
                         if len(olist) > 1:
                             pygame.draw.lines(screen,(200,150,150),1,[(glm.floor(col.rect.topleft - self.camera_pos + self.half_screen_size + (x,y))) for x,y in olist])
                         pygame.draw.rect(screen,(200,150,150),col.rect.move(glm.floor(-self.camera_pos+self.half_screen_size)),1)
+            
+            for particle in self.particles:
+                screen.blit(particle.surf,particle.pos)
+                particle.pos += particle.vel * self.dt
             if __debug__ and debug.Profile.active:
                 t_g = time.perf_counter()
             self.game_manager.ui_draw()
