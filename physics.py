@@ -200,23 +200,41 @@ def collide_chunks2d(x1:float,y1:float,x2:float,y2:float,chunk_size:int):
     return [(x,y) for x in range(cx1,cx2,1) for y in range(cy1,cy2,1)]
 
 
-def linecast(origin:Vec2,dest:Vec2,map:MapType):
-    '''This implementation is incorrect: TODO Use Proper voxel traversal raycast algo'''
-    chunks_crossed = set()
-    
-    for i in range(200):
-        i /= 200
-        p = origin * (1-i) + dest * i
-        cpos = glm.ivec2(p // GameConstants.CHUNK_SIZE).to_tuple()
-        if cpos in chunks_crossed: continue
-        chunks_crossed.add(cpos)
-        for entity in map.get(cpos,[]):
-            raise NotImplementedError
-    
+def linecast(origin:Vec2,dest:Vec2,map:MapType,subsections:int=200):
+    '''This implementation is incorrect: TODO Use DDA for chunk traversal algo'''
+    origin_cpos = glm.ivec2(origin // GameConstants.CHUNK_SIZE)
+    dest_cpos = glm.ivec2(dest // GameConstants.CHUNK_SIZE)
+    collided = set()
+    if origin_cpos == dest_cpos:
+        for collider in map.get(origin_cpos.to_tuple(),[]):
+            ent = collider.gameObject
+            if collider.rect.clipline(origin,dest) and ent not in collided:
+                assert isinstance(collider,MaskCollider)
+                if any(collider.mask.get_bounding_rects()):
+                    collided.add(ent)
+                    yield ent
+    else:
+        chunks_crossed = set()
+        for i in range(subsections):
+            i /= subsections
+            p = origin * (1-i) + dest * i
+            cpos = glm.ivec2(p // GameConstants.CHUNK_SIZE).to_tuple()
+            if cpos in chunks_crossed: continue
+            chunks_crossed.add(cpos)
+            for collider in map.get(cpos,[]):
+                ent = collider.gameObject
+                if collider.rect.clipline(origin,dest) and ent not in collided:
+                    assert isinstance(collider,MaskCollider)
+                    if any(collider.mask.get_bounding_rects()):
+                        collided.add(ent)
+                        yield ent
 
-def collide_line_rect(origin:Vec2,dir:Vec2,rect:Rect):
-    if not dir.x: return rect.left < origin.x < rect.right
-    if not dir.y: return rect.top < origin.y < rect.bottom
+
+
+def collide_line_rect(origin:Vec2,dest:Vec2,rect:Rect):
+    # if not dir.x: return rect.left < origin.x < rect.right
+    # if not dir.y: return rect.top < origin.y < rect.bottom
+    return bool(rect.clipline(origin,dest))
     
     t_top = rect.top / dir.y
     t_bottom = rect.bottom / dir.y

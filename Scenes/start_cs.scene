@@ -24,8 +24,16 @@
                 "ActionTriggerOnStart('d1')",
                 "Dialogue('d1',[('Hello!',20),('Glad to see you recovering',20),('Recieved a nasty hit in the head, didnt ya!',20),('Oh,          \nYou dont remember who you are?',20),('You are a sentient roomba on legs! Hah!',20),('Anyways, we have to get back to work!\nQuick before §Cz00boss§Czzz catches us slacking!',30)],next='end')",
                 "RunExternalAction('end','Boss Meanie','start',next='start working')",
-                "FollowPath('start working',[(800,80)])"
+                "FollowPath('start working',[(931,260)])"
             ]
+        },
+        {
+            "name":"Workspace1",
+            "pos":[931,300],
+            "rot":0,
+            "mass":"inf",
+            "surf_path":"./Images/Game/Entities/damaged_table.png",
+            "collider":"MaskCollider"
         },
         {
             "name":"Boss Meanie",

@@ -30,7 +30,7 @@ def formatBytes(b:int):
         b >>= 10
     return f'{b} {['B','KiB','MiB','GiB'][i]}'
 
-def formatTime(b:int,*,format = '.2f'):
+def formatTimeDebug(b:int,*,format = '.2f'):
     if b <= 0:
         return f'{b} s'
     i = 0
@@ -332,3 +332,27 @@ def angleDifference(target_angle:float,current_angle:float):
     return d_rot
 
 
+def formatTime(hours:int,minutes:int,format:str='12'):
+    if format == '12':
+        h = hours-1
+        meridian = 'AM' if hours < 12 else 'PM'
+        h %= 12 
+        h += 1
+
+        return f'{h}:{minutes:0>2} {meridian}'
+    elif format == '24':
+        return f'{hours}:{minutes:0>2}'
+    else:
+        raise ValueError("Incorrect format: {}".format(format))
+    
+
+def walkOutWards(max:int):
+    '''Yield the Sequence: 0, 1, -1, 2, -2, 3, -3, 4, -4, n-1, -(n-1)'''
+    if max < 1:
+        return
+    yield 0
+    i = 1
+    while i < max:
+        yield i
+        yield -i
+        i += 1

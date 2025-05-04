@@ -14,7 +14,6 @@ class PlayerController(Behaviour):
         self.camera_pos = game.camera_pos
         self.target_rot = 0
 
-
     def update(self, gameObject:EntityType, map, dt:float, game:GameType):
         if not self.active:return
         keys = pygame.key.get_pressed()
@@ -46,3 +45,36 @@ class PlayerController(Behaviour):
     def onCollide(self, gameObject, other):
         self.target_rot = None
 
+    def onDeath(self, gameObject, map, dt, game:GameType):
+        game.asyncCtx.StartCoroutine(self.fjkaldfkl(game))
+
+    def fjkaldfkl(self,game:GameType):
+        import Async
+        import GameStorage
+        from Utils.TextRenderer import TextRenderer
+        timer = Async.Timer(2,game)
+        screen = game.game_manager.screen
+        timer.start()
+
+        while timer.isRunning():
+            screen.fill((200,200,200),special_flags=pygame.BLEND_MULT)
+            yield
+        timer.start()
+        tr = TextRenderer(GameStorage.death_font)
+        death_note = tr.render_align(GameStorage.death_messsage or 'You Died')
+        while timer.isRunning():
+            screen.fill((200,200,200),special_flags=pygame.BLEND_MULT)
+            screen.blit(death_note,death_note.get_rect(center=screen.get_rect().center))
+            yield
+        timer.start()
+        while timer.isRunning():
+            screen.fill((200,200,200),special_flags=pygame.BLEND_MULT)
+            screen.blit(death_note,death_note.get_rect(center=screen.get_rect().center))
+            t = timer.getTimeLeftPercent()
+            screen.fill((255*t,255*t,255*t),special_flags=pygame.BLEND_MULT)
+            yield
+        
+        quitEvent = pygame.Event(pygame.QUIT,{'code':1})
+        pygame.event.post(quitEvent)
+        screen.fill((0,0,0))
+        yield

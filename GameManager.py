@@ -1,9 +1,6 @@
 import os
-import time
 import pygame
-import random
-import physics
-import ResourceManager
+import GameStorage
 from pyglm import glm
 from gametypes import *
 from EntityTags import *
@@ -32,16 +29,15 @@ class GameManager:
                 if name in self.scenes:
                     raise NameError(f'Error Loading Scenes: There are two scenes with the name: {name}')
                 fqn = os.path.abspath(os.path.join(SCENE_FOLDER,filename))
-                self.scenes[name] = Scene(fqn)
-        self.pre_draw_layers = {
-            -1:1
-        }
+                self.scenes[name] = Scene.fromFile(fqn)
 
         self.current_dialogue:None|tuple[str|int] = None
+        GameStorage.init()
 
 
 
     def start_game(self):
+        
         self.scene = self.scenes['start_cs']
         self.scene.start(self.game)
 

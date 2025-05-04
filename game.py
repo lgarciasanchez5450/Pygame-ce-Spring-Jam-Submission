@@ -48,6 +48,9 @@ class Game:
                 entity.dirty = False
         self.to_spawn.extend(entities)
 
+    def spawnParticle(self,particle:Particle):
+        self.particles.append(particle)
+
     def toWorldCoords(self,screen_cords:glm.vec2|tuple[int,int]):
         return screen_cords + self.camera_pos - self.half_screen_size
     
@@ -69,7 +72,8 @@ class Game:
             Input._update()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    sys.exit(0)
+                    code = int(event.dict.get('code',0))
+                    sys.exit(code)
                 if event.type == pygame.KEYDOWN: #TODO move some of this logic to player class and 
                     if event.key == pygame.K_ESCAPE:
                         sys.exit(0)
@@ -117,6 +121,8 @@ class Game:
             self.game_manager.pre_draw()
             if __debug__ and debug.Profile.active:
                 t_f = time.perf_counter()
+            # Draw All Behind Entities #
+            
             # Draw All Entities #
             for e in physics.get_colliding(self.screen_rect,map,layers=0b111,collideTriggers=True):
                 for col in e.colliders:
@@ -128,10 +134,14 @@ class Game:
                         if len(olist) > 1:
                             pygame.draw.lines(screen,(200,150,150),1,[(glm.floor(col.rect.topleft - self.camera_pos + self.half_screen_size + (x,y))) for x,y in olist])
                         pygame.draw.rect(screen,(200,150,150),col.rect.move(glm.floor(-self.camera_pos+self.half_screen_size)),1)
-            
-            for particle in self.particles:
-                screen.blit(particle.surf,particle.pos)
-                particle.pos += particle.vel * self.dt
+            for i in range(len(self.particles)-1,-1,-1):
+                p = self.particles[i]
+                if p.dead:
+                    self.particles.pop(i)
+                else:
+                    screen.blit(p.surf,glm.floor(p.pos-p.offset-(self.camera_pos)+self.half_screen_size))
+                    p.pos += p.vel * self.dt    
+
             if __debug__ and debug.Profile.active:
                 t_g = time.perf_counter()
             self.game_manager.ui_draw()
@@ -149,18 +159,18 @@ class Game:
             if __debug__:
                 if debug.Profile.active:
                     tot = t_end-t_start
-                    print(f'Input+Pre Update:   {Utils.formatTime(t_a-build_map_better.last_timed-t_start,format='6.2f')} ({100*(t_a-build_map_better.last_timed-t_start)/tot:.1f}%)',)
-                    print(f'Building Map:       {Utils.formatTime(build_map_better.last_timed,format='6.2f')} ({100*(build_map_better.last_timed)/tot:.1f}%)',)
-                    print(f'Update Entities:    {Utils.formatTime(t_b-t_a,format='6.2f')} ({100*(t_b-t_a)/tot:.1f}%)',)
-                    print(f'Post Update:        {Utils.formatTime(t_c-t_b,format='6.2f')} ({100*(t_c-t_b)/tot:.1f}%)',)
-                    print(f'Cleaning:           {Utils.formatTime(t_d-t_c,format='6.2f')} ({100*(t_d-t_c)/tot:.1f}%)',)
-                    print(f'Physics:            {Utils.formatTime(physics.calc_collision_map.last_timed,format='6.2f')} ({100*(physics.calc_collision_map.last_timed)/tot:.1f}%)',)
-                    print(f'Pre Draw:           {Utils.formatTime(t_f-t_e,format='6.2f')} ({100*(t_f-t_e)/tot:.1f}%)',)
-                    print(f'Draw:               {Utils.formatTime(t_g-t_f,format='6.2f')} ({100*(t_g-t_f)/tot:.1f}%)',)
-                    print(f'UI Draw:            {Utils.formatTime(t_h-t_g,format='6.2f')} ({100*(t_h-t_g)/tot:.1f}%)',)
-                    print(f'Frame Build:        {Utils.formatTime(t_end-t_start,format='6.2f')} ({100*(t_end-t_start)/tot:.1f}%)',)
-                    print(f'Frame Display:      {Utils.formatTime(t_final-t_end,format='6.2f')} ({100*(t_final-t_end)/(tot+t_final-t_end):.1f}%)',)
-                    print(f'Total Frame Time:   {Utils.formatTime(t_final-t_start,format='6.2f')} ({100*(t_final-t_start)/(tot+t_final-t_end):.1f}%)',)
+                    print(f'Input+Pre Update:   {Utils.formatTimeDebug(t_a-build_map_better.last_timed-t_start,format='6.2f')} ({100*(t_a-build_map_better.last_timed-t_start)/tot:.1f}%)',)
+                    print(f'Building Map:       {Utils.formatTimeDebug(build_map_better.last_timed,format='6.2f')} ({100*(build_map_better.last_timed)/tot:.1f}%)',)
+                    print(f'Update Entities:    {Utils.formatTimeDebug(t_b-t_a,format='6.2f')} ({100*(t_b-t_a)/tot:.1f}%)',)
+                    print(f'Post Update:        {Utils.formatTimeDebug(t_c-t_b,format='6.2f')} ({100*(t_c-t_b)/tot:.1f}%)',)
+                    print(f'Cleaning:           {Utils.formatTimeDebug(t_d-t_c,format='6.2f')} ({100*(t_d-t_c)/tot:.1f}%)',)
+                    print(f'Physics:            {Utils.formatTimeDebug(physics.calc_collision_map.last_timed,format='6.2f')} ({100*(physics.calc_collision_map.last_timed)/tot:.1f}%)',)
+                    print(f'Pre Draw:           {Utils.formatTimeDebug(t_f-t_e,format='6.2f')} ({100*(t_f-t_e)/tot:.1f}%)',)
+                    print(f'Draw:               {Utils.formatTimeDebug(t_g-t_f,format='6.2f')} ({100*(t_g-t_f)/tot:.1f}%)',)
+                    print(f'UI Draw:            {Utils.formatTimeDebug(t_h-t_g,format='6.2f')} ({100*(t_h-t_g)/tot:.1f}%)',)
+                    print(f'Frame Build:        {Utils.formatTimeDebug(t_end-t_start,format='6.2f')} ({100*(t_end-t_start)/tot:.1f}%)',)
+                    print(f'Frame Display:      {Utils.formatTimeDebug(t_final-t_end,format='6.2f')} ({100*(t_final-t_end)/(tot+t_final-t_end):.1f}%)',)
+                    print(f'Total Frame Time:   {Utils.formatTimeDebug(t_final-t_start,format='6.2f')} ({100*(t_final-t_start)/(tot+t_final-t_end):.1f}%)',)
                     print(f'Size of Global Entity Cache:',len(Entity._global_cache))
 
     #### Utility Functions for Behaviours ####

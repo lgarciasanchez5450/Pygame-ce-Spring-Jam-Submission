@@ -1,21 +1,19 @@
 {
-    "map_path":"./Images/Game/Maps/warehouse.png",
+    "map_path":"./Images/Game/Maps/warehouse_hole.png",
     "entities": [
         {
-            "name":"DumpArea",
+            "name":"DumpArea-Cover",
             "pos":[512,512],
             "vel":[0,0],
             "mass":1,
-            "rot":0,
-            "rot_vel":0,
             "colliders":[
                 "MaskCollider(isTrigger=True,layers=4)"
             ],
-            "surf_path":"./Images/Game/Entities/RedStripes.png",
+            "surf_path":"./Images/Game/Entities/DumpOpen/00.png",
             "behaviours": [
-                "Animation('open',dir='./Images/Game/Entities/DumpOpen',fps=40)",
-                "Animation('close',dir='./Images/Game/Entities/DumpOpen',fps=40,reverse=True)",
-                "DumpBehaviour('dump',open_anim='open',close_anim='close')"
+                "Animation('open_anim',dir='./Images/Game/Entities/DumpOpen',fps=80)",
+                "Animation('close_anim',dir='./Images/Game/Entities/DumpOpen',fps=80,reverse=True)",
+                "DumpBehaviour('dump',open_anim='open_anim',close_anim='close_anim')"
             ]
         },
         {
@@ -31,7 +29,7 @@
             "surf_path":"./Images/Game/Entities/pressure_plate.png",
             "behaviours": [
                 "ActionTriggerInteract('go',offset=(0,-30))",
-                "RunExternalAction('go','DumpArea','dump')"
+                "RunExternalAction('go','DumpArea-Cover','dump')"
             ]
         },
         {
@@ -45,6 +43,38 @@
                 "MaskCollider(layers=5)"
             ],
             "surf_path":"./Images/Game/Entities/Borken1.png"
+        },
+        {
+            "name":"scrap1",
+            "pos":[400,100],
+            "vel":[0,0],
+            "mass":0.1,
+            "rot":1,
+            "rot_vel":0,
+            "colliders":[
+                "MaskCollider(layers=5)"
+            ],
+            "surf_path":"./Images/Game/Entities/Borken2.png"
+        },
+        {
+            "name":"scrap2",
+            "pos":[600,300],
+            "vel":[0,0],
+            "mass":0.1,
+            "rot":1,
+            "rot_vel":0,
+            "collider":"MaskCollider(layers=5)",
+            "surf_path":"./Images/Game/Entities/Borken3.png"
+        },
+        {
+            "name":"scrap3",
+            "pos":[125,437],
+            "vel":[0,0],
+            "mass":0.1,
+            "rot":-2,
+            "rot_vel":0,
+            "collider":"MaskCollider(layers=5)",
+            "surf_path":"./Images/Game/Entities/Borken4.png"
         },
         {
             "name":"Player",
@@ -63,9 +93,13 @@
             "name":"Uncle Bob",
             "pos":[931,260],
             "rot":-1.5707963267948966,
-            "mass":"inf",
+            "mass":1,
             "surf_path":"./Images/Game/Entities/head_blue.png",
-            "collider":"MaskCollider"
+            "collider":"MaskCollider",
+            "behaviours":[
+                "RobotControllerAdvanced",
+                "WorkerBehaviour((800,100),(931,400))"
+            ]
         },
         {
             "name":"Workspace1",
@@ -79,6 +113,22 @@
             "name":"Workspace1_Paper",
             "pos":[950,300],
             "rot":-2.9,
+            "mass":"inf",
+            "surf_path":"./Images/Game/Entities/smol_paper.png",
+            "collider":"AABBCollider((1,1),rotates=False,layers=2,isTrigger=True)"
+        },
+        {
+            "name":"Workspace2",
+            "pos":[931,600],
+            "rot":0,
+            "mass":"inf",
+            "surf_path":"./Images/Game/Entities/damaged_table.png",
+            "collider":"MaskCollider"
+        },
+        {
+            "name":"Workspace2_Paper",
+            "pos":[920,600],
+            "rot":-1.9,
             "mass":"inf",
             "surf_path":"./Images/Game/Entities/smol_paper.png",
             "collider":"AABBCollider((1,1),rotates=False,layers=2,isTrigger=True)"
@@ -124,6 +174,8 @@
     ],
     "behaviours": [
         "SaveEntities",
-        "CameraFollowPlayer"
+        "CameraFollowPlayer",
+        "TrackTime(offset=(10,10))",
+        "ShowDetail('Pieces Scrapped: {scrap_collected_today}',offset=(10,40))"
     ]
 }

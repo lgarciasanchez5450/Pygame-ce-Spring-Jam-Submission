@@ -7,6 +7,7 @@ from . import AnimationSequence
 from . import PlayerController
 from . import SceneTransporter
 from . import InteractNotifier
+from . import WorkerBehaviour
 from . import RobotController
 from . import DumpBehaviour
 from . import MoveEntities

@@ -25,7 +25,12 @@ def loadEntity(e:str|dict) -> Entity:
                     return loadEntity(json.load(file))
         raise FileNotFoundError(f"Prefab {repr(e)} could not be found in PATH")
     elif type(e) is dict:
-        return _parseEntityData(e)
+        e_name = e.get('name','NAME NOT FOUND')
+        try:
+            return _parseEntityData(e)
+        except Exception as err:
+            err.add_note(f'Entity: {e_name}')
+            raise err
     else:
         raise TypeError(f'Cannot Convert type {type(e).__name__} to Entity')
 

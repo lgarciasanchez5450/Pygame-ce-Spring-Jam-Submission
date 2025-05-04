@@ -4,13 +4,11 @@ from pyglm import glm
 from gametypes import *
 from Behaviours.Behaviour import Behaviour
 
+
 class RobotController(Behaviour):
-    camera_pos:Vec2        
     def start(self, gameObject:EntityType, game:GameType):
-        self.camera_pos = game.camera_pos
         self.target_rot = None
         self.dir = glm.vec2()
-
 
     def Move(self,dir:Vec2):
         self.dir = glm.vec2(dir)

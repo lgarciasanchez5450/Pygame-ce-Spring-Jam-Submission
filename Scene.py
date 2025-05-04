@@ -18,8 +18,9 @@ class Scene:
     map:Surface
     entities:list[EntityType]
     behaviours:list[SceneBehaviour]
-
-    def __init__(self,path:str):
+    @classmethod
+    def fromFile(cls,path:str):
+        self = Scene()
         try:    
             with open(path,'r',encoding='utf-8') as file:
                 map_data:dict = json.load(file)
@@ -41,6 +42,7 @@ class Scene:
         except Exception as err:
             err.add_note("Error Loading Scene {}".format(path))
             raise err
+        return self
     
 
     def start(self,game:GameType):
