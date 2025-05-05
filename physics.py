@@ -80,8 +80,9 @@ def calc_collision_map(map:MapType,dt:float,game:GameType,lastState:PhysicsState
                         if set_bits:
                             dx = _moa(other_mask, (x + 1, y)) - _moa(other_mask, (x - 1, y))
                             dy = _moa(other_mask, (x, y + 1)) - _moa(other_mask, (x, y - 1))
-
-                            collision_normal = glm.normalize(glm.vec2(dx,dy))
+                            collision_normal = glm.vec2(dx,dy)
+                            if dx != 0 or dy != 0:
+                                collision_normal = glm.normalize(collision_normal)
                             info = CollisionInfo()
                             info.mask = mask
                             info.center_of_collision = glm.vec2(mask.centroid()) + _r.topleft
@@ -149,19 +150,21 @@ def resolveCollision(a:EntityType,b:EntityType,info:CollisionInfo,normal:Vec2,dt
             b_dir = b.pos - info.center_of_collision
             b_tau = utils.cross2d(b_dir,-normal)
             b.rot_vel += b_tau * (a.mo_inertia / (a.mo_inertia+b.mo_inertia))  * dt
-        import math
-        if not math.isfinite(b.rot_vel) or not math.isfinite(a.rot_vel):
-            print('A:')
-            print('\tname:',a.name)
-            print('\tmo_inertia:',a.mo_inertia)
-            print('\tpos:',a.pos)
-            print('\trot:',a.rot)
-            print('B:')
-            print('\tname:',b.name)
-            print('\tmo_inertia:',b.mo_inertia)
-            print('\tpos:',b.pos)
-            print('\trot:',b.rot)
-        
+        # print('Collision Normal:',normal,)
+        # print('A:')
+        # print('\tname:',a.name)
+        # print('\ta_dir:',a_dir)
+        # print('\tmo_inertia:',a.mo_inertia)
+        # print('\trot_vel:',a.rot_vel)
+        # print('\tpos:',a.pos)
+        # print('\trot:',a.rot)
+        # print('B:')
+        # print('\tname:',b.name)
+        # print('\tmo_inertia:',b.mo_inertia)
+        # print('\trot_vel:',b.rot_vel)
+        # print('\tpos:',b.pos)
+        # print('\trot:',b.rot)
+    
 def get_colliding(r:Rect,map:MapType,layers:int=1,collideTriggers:bool=False):
     s = set()
     _cr = r.colliderect
@@ -175,6 +178,18 @@ def get_colliding(r:Rect,map:MapType,layers:int=1,collideTriggers:bool=False):
                     s.add(ent)
                     yield ent
                     
+def get_colliding_colliders(r:Rect,map:MapType,layers:int=1,collideTriggers:bool=False):
+    s:set[ColliderType] = set()
+    _cr = r.colliderect
+    for cpos in collide_chunks2d(r.left,r.top,r.right,r.bottom,GameConstants.CHUNK_SIZE):
+        if cols:=map.get(cpos):
+            for other in cols:
+                if not (other.layers & layers): continue
+                if other.isTrigger and not collideTriggers: continue
+                if other not in s and _cr(other):
+                    s.add(other)
+                    yield other
+
 def get_contained(r:Rect,map:MapType,layers:int=1,collideTriggers:bool=False):
     s = set()
     _cr = r.colliderect

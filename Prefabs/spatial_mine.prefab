@@ -1,0 +1,8 @@
+{
+    "name":"SpatialMine",
+    "pos":[0,0],
+    "rot":0,
+    "mass":0.5,
+    "surf_path":"./Images/Game/Entities/Mine.png",
+    "collider":"MaskCollider(layers=4)"
+}

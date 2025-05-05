@@ -7,6 +7,7 @@ class WaitAction(Action):
         self.time = time
 
     def Run(self, gameObject, game:GameType, *args):
+        self.running = True
         game.asyncCtx.StartCoroutine(self.waitAsync(gameObject,game))
         
     def waitAsync(self,gameObject,game:GameType):
@@ -15,3 +16,4 @@ class WaitAction(Action):
         while timer.isRunning():
             yield
         self.RunNextAction(gameObject,game)
+        self.running = False

@@ -1,0 +1,10 @@
+{
+    "name":"SpatialExplosion",
+    "pos":[0,0],
+    "rot":0,
+    "mass":0.5,
+    "collider":"BoxCollider((64,64),isTrigger=True,layers=2)",
+    "behaviours":[
+        "Animation('boom',fps=40,dir='./Images/Game/Entities/MineExplosion/')"
+    ]
+}

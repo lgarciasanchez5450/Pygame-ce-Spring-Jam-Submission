@@ -1,8 +1,10 @@
+import Input
 import pygame
+import GameStorage
 from pyglm import glm
 from gametypes import *
 from .Action import Action
-import Input
+
 
 class Dialogue(Action):
     __slots__ = 'dialogue',
@@ -19,7 +21,8 @@ class Dialogue(Action):
         scene = gm.scene
         i = 0
         while i < len(self.dialogue):
-            dialogue_state = gm.PopDialogue(self.dialogue[i])
+            str,spd = self.dialogue[i]
+            dialogue_state = gm.PopDialogue((str.format(**GameStorage.__dict__),spd))
             yield
             while True:
                 if Input.getKeyJustPressed(Input.K_SPACE):
@@ -35,6 +38,8 @@ class Dialogue(Action):
             i += 1
         gm.PopDialogue(None)
         yield
-        self.RunNextAction(gameObject,game)
+        if next_action:=self.RunNextAction(gameObject,game):
+            while next_action.running:
+                yield
         self.running = False
 

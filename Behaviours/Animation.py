@@ -50,14 +50,16 @@ class Animation(Action):
             gameObject._surf = frame_surf
             gameObject.dirty = True
             return
-
+        
         last_frame = self.t.__trunc__()
         self.t += dt * self.fps
         cur_frame = self.t.__trunc__()
         if last_frame != cur_frame:
+            # print(cur_frame)
             if cur_frame == len(self.frames):
                 self.running = False
             else:
                 frame_surf = self.frames[cur_frame]
+
                 gameObject._surf = frame_surf
                 gameObject.dirty = True

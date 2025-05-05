@@ -18,8 +18,11 @@ class ActionTriggerInteract(ActionTrigger):
                     self.action_b.Run(gameObject,game)
 
     def onTriggerEnter(self, gameObject, other, game:GameType):
-        self.entity.dead = False
-        game.spawnEntity(self.entity)
+        if other.name == 'Player':
+            self.entity.dead = False
+            game.spawnEntity(self.entity)
 
     def onTriggerLeave(self, gameObject, other, game):
-        self.entity.dead = True
+        if other.name == 'Player':
+
+            self.entity.dead = True

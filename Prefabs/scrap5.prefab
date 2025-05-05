@@ -1,0 +1,8 @@
+{
+    "name":"scrap5",
+    "pos":[600,300],
+    "vel":[0,0],
+    "mass":0.1,
+    "collider":"MaskCollider(layers=1)",
+    "surf_path":"./Images/Game/Entities/Borken5.png"
+}

@@ -212,7 +212,7 @@ def parseTokens(tokens:list[str]) -> typing.Any:
     else:
         token = tokens[0]
         try:
-            return int(token)
+            return int(token,base=0)
         except:pass
         try:
             return float(token)

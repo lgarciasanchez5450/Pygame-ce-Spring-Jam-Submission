@@ -35,6 +35,7 @@ class Game:
         self.asyncCtx = Async.Context()
 
     def spawnEntity(self,entity:Entity):
+        '''Takes Ownership of entity passed in'''
         if entity.dirty:
             entity.clean()
             entity.dirty = False
@@ -125,11 +126,11 @@ class Game:
             
             # Draw All Entities #
             for e in physics.get_colliding(self.screen_rect,map,layers=0b111,collideTriggers=True):
-                for col in e.colliders:
-                    if e.surf:
-                        s = glm.vec2(e.surf.get_size())//2
-                        screen.blit(e.surf,glm.floor(e.pos-s-(self.camera_pos)+self.half_screen_size))
-                    if __debug__ and f3_mode:
+                if e.surf:
+                    s = glm.vec2(e.surf.get_size())//2
+                    screen.blit(e.surf,glm.floor(e.pos-s-(self.camera_pos)+self.half_screen_size))
+                if __debug__ and f3_mode:
+                    for col in e.colliders:
                         olist = col.mask.outline()
                         if len(olist) > 1:
                             pygame.draw.lines(screen,(200,150,150),1,[(glm.floor(col.rect.topleft - self.camera_pos + self.half_screen_size + (x,y))) for x,y in olist])
@@ -198,7 +199,7 @@ class Game:
 if __name__ == '__main__':
     print('!!Debug Only!!')
     pygame.init()
-    # win = pygame.Window('game test',(900,600))#(1920,1080))
-    win = pygame.Window('game test',(1920,1080))
+    win = pygame.Window('game test',(900,600))#(1920,1080))
+    # win = pygame.Window('game test',(1920,1080))
     game = Game(win)
     game.run()

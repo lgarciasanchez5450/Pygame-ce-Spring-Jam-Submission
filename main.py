@@ -9,10 +9,15 @@ win = pygame.Window(
     size = (1920,1080),
     fullscreen = True
 )
-
 main_menu = menu.MainMenu(win)
-main_menu.run()
+while True:
+    main_menu.run()
+    try:
+        g = game.Game(win)
+        g.run()
+    except SystemExit as err:
+        if err.code != 1:
+            raise
 
-g = game.Game(win)
-g.run()
 
+    

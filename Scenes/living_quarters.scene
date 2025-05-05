@@ -39,7 +39,7 @@
                 "MaskCollider",
                 "BoxCollider((100,100),isTrigger=True,layers=2)"
             ],
-            "surf_path":"./Images/Game/Crates/Wooden.png",
+            "surf_path":"./Images/Game/Entities/winent.png",
             "behaviours": [
                 "ActionTriggerInteract('FirstDialogue',offset=(0,-20))",
                 "Dialogue('FirstDialogue',[('Hello!!!',10),('My Name is TextTriggerThingy!',20)])"

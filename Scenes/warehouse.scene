@@ -86,7 +86,8 @@
             "collider":"MaskCollider(layers=3)",
             "surf_path":"./Images/Game/Player/head2.png",
             "behaviours": [
-                "PlayerController"
+                "PlayerController",
+                "SpatialinatorBehaviour((.1,0.9),(0,0))"
             ]
         },
         {
@@ -95,10 +96,26 @@
             "rot":-1.5707963267948966,
             "mass":1,
             "surf_path":"./Images/Game/Entities/head_blue.png",
-            "collider":"MaskCollider",
+            "colliders":["MaskCollider","BoxCollider((100,100),isTrigger=True)"],
             "behaviours":[
                 "RobotControllerAdvanced",
-                "WorkerBehaviour((800,100),(931,400))"
+                "WorkerBehaviour('Workspace1',(950,90),(931,400),(650,850))",
+                "ActionTriggerInteract('test',offset=(0,-20))",
+                "Condition('test',{'told_player_how_to_play_safe==False':'how_to_play_safe','found_spatial==False':'random_dialogue','found_spatial==True':'af1'})",
+                "Dialogue('how_to_play_safe',[('Sooo...',20),('Did you forget what your supposed to be doing here?',20),('§CaaaKind of....',13),('No Worries! I love helping out!',20),('For Context, we work in an android manufacturing facility.\nMe and the other guys job is to build them and put them into neat boxes...',20),('However sometimes there are defective parts, we put those aside\nIt is your job to pick them up and deposit them into the recycling thingy in the center',20),('Makes sense?',20)],next='confirm_makes_sense')",
+                "GetInput('confirm_makes_sense',['I understand 100%','Could you say what my job was again?'],next='comprehension_test')",
+                "Condition('comprehension_test',{'user_input_index==0':'knows_htps','True':'how_to_play_safe'})",
+                "ChangeState('knows_htps','told_player_how_to_play_safe','True',next='confirm_good')",
+                "Dialogue('confirm_good',[('Thats Great! If you need anything let me know. Also §Ca00Boss§Czzz should know more details about your job',20)])",
+
+                "ChooseRandom('random_dialogue',['rd1','rd2','rd3'])",
+                
+                "Dialogue('rd1',[('Do you know what is my favorite animal??',20), ('Its a dog! Because they are so cute and fluffy!',20)])",
+                "Dialogue('rd2',[('You know, the other day I was thinking about dogs\nand found an interesting crevice in the left wall!',20),('Maybe you should check it out, the little crack in the wall.',20)])",
+                "Dialogue('rd3',[('Do you ever wonder if this world you live in is not real?\nSometimes I do...', 20)])",
+
+                "Dialogue('af1',[('Oooh you have an interesting gizmo!',20),('It seems to swap the places of things, very nice!',20)])"
+
             ]
         },
         {
@@ -111,11 +128,23 @@
         },
         {
             "name":"Workspace1_Paper",
-            "pos":[950,300],
+            "pos":[970,300],
             "rot":-2.9,
             "mass":"inf",
             "surf_path":"./Images/Game/Entities/smol_paper.png",
             "collider":"AABBCollider((1,1),rotates=False,layers=2,isTrigger=True)"
+        },
+        {
+            "name":"Um Aktually Guy",
+            "pos":[931,560],
+            "rot":-1.5707963267948966,
+            "mass":1,
+            "surf_path":"./Images/Game/Entities/head_green.png",
+            "collider":"MaskCollider",
+            "behaviours":[
+                "RobotControllerAdvanced",
+                "WorkerBehaviour('Workspace2',(950,90),(931,700),(650,850))"
+            ]
         },
         {
             "name":"Workspace2",
@@ -143,33 +172,62 @@
                 "BoxCollider((40,40),isTrigger=True,layers=2)"
             ],
             "behaviours":[
-                "ActionTriggerInteract('talk',offset=(0,-30))",
-                "Dialogue('talk',[('Hey what are you doing!',20),('Go Back to your station!',20)])"
+                "RobotControllerAdvanced",
+                "ActionTriggerInteract('test1',offset=(0,-30))",
+                "Condition('test1',{'scrap_collected_today>=10':'follow_me_dialogue','told_player_quota==False':'tell_player_quota','scrap_collected_today<10':'mad_dialogue'})",
+                "Dialogue('tell_player_quota',[('§Ce99Hey what are you doing! Go Back to your station!',20),('The next time I see you,\nyou better have completed your quota of §Caaa10§Czzz scrap!',20)],next='mark_told_quota')",
+                "ChangeState('mark_told_quota','told_player_quota','True')",
+                "Dialogue('mad_dialogue',[('§Ce99What did I just tell you?!',20),('§Ce99You only have {scrap_collected_today}!!!',20),('§Cg55This is your final warning...',15)])",
+                "ActionTriggerTimeout('test',300)",
+                "Condition('test',{'scrap_collected_today>=10':'happy','scrap_collected_today<10':'mad'})",
+                "Dialogue('mad',[('§Ce99You have taken so long that you shift is over!',20)],next='bbad')",
+                "ChangeState('bbad','boss_favorability','boss_favorability-1',next='to_day_2')",
+
+                "Dialogue('follow_me_dialogue',[('Wow you already completed your quota!',20),('Now you can go back to your priso- I mean company sponsored housing!',20),('Follow Me!',20)],next='go_to_door')",
+                "GoToPosition('go_to_door',(370,950),next='abc')",
+                "ChangeState('abc','boss_favorability','boss_favorability+1',next='to_day_2')",
+                "SceneTransporter('to_day_2','warehouse-day2')"
+            ]
+        },
+        {
+            "name":"Crack In the Wall",
+            "pos":[30,725],
+            "mass":"inf",
+            "colliders":[
+                "BoxCollider((60,40),isTrigger=True)"
+            ],
+            "behaviours":[
+                "ActionTriggerInteract('test',offset=(0,-30))",
+                "Condition('test',{'found_spatial==False':'found_dialogue','found_spatial==True':'already_found'})",
+                "Dialogue('already_found',[('Just a normal crack in the wall',20)])",
+                "ChangeState('found','found_spatial','True',next='popup')",
+                "Dialogue('found_dialogue',[('Huh there is something here...',18),('On the side it says §Cz0zSPATIAL-inator 3000§Czzz ...',20)],next='found')",
+                "Notify('popup','You Found A §Cz0zSPATIAL-inator 3000§Czzz!',2,(0,-50),(0,-10))"
             ]
         },
         {
             "name":"left_wall",
             "pos":[24,512],
             "mass":"inf",
-            "collider":"AABBCollider((40,950),rotates=False)"
+            "collider":"AABBCollider((40,950),layers=7,rotates=False)"
         },
         {
             "name":"right_wall",
             "pos":[1000,512],
             "mass":"inf",
-            "collider":"AABBCollider((40,950),rotates=False)"
+            "collider":"AABBCollider((40,950),layers=7,rotates=False)"
         },
         {
             "name":"bottom_wall",
             "pos":[512,985],
             "mass":"inf",
-            "collider":"AABBCollider((950,40),rotates=False)"
+            "collider":"AABBCollider((950,40),layers=7,rotates=False)"
         },
         {
             "name":"top_wall",
             "pos":[512,39],
             "mass":"inf",
-            "collider":"AABBCollider((950,40),rotates=False)"
+            "collider":"AABBCollider((950,40),layers=7,rotates=False)"
         }
     ],
     "behaviours": [

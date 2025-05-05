@@ -44,7 +44,7 @@ elif action == 'clean':
     except:pass
 elif action == 'make':
     print('Building Executable (Pyinstaller)')
-    proc = sp.run(['pyinstaller','main.py','--onefile','--optimize','2'],capture_output=True,text=True)
+    proc = sp.run(['pyinstaller','main.py','--onefile','--optimize','2','--noconsole'],capture_output=True,text=True)
     if proc.returncode != 0:
         print("Pyinstaller Error:")
         print(proc.stderr or '')

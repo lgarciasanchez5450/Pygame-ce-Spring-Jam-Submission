@@ -18,7 +18,7 @@ class Action(Behaviour):
             n = self.getNext(gameObject)
             if not n.running or even_if_already_running:
                 n.Run(gameObject,game)
-                return True
+                return n
         return False
 
     def getNext(self,gameObject:EntityType):

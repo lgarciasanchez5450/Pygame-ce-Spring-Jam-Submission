@@ -5,6 +5,7 @@ import ResourceManager
 
 class MainMenu:
     def __init__(self,window:pygame.Window):
+        self.run_splash = True
         self.window = window
         window.get_surface()
         self.splash_screens:list[tuple[pygame.Surface,int,int,int]] = [
@@ -112,7 +113,9 @@ class MainMenu:
             self.window.flip()
 
     def run(self):
-        self.runSplashScreens()
+        if self.run_splash:
+            self.runSplashScreens()
+            self.run_splash = False
         self.running = True
         self.cur_layer = self.layer
         screen = self.window.get_surface()

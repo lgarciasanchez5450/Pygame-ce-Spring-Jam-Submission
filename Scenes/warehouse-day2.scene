@@ -1,0 +1,249 @@
+{
+    "map_path":"./Images/Game/Maps/warehouse_hole.png",
+    "entities": [
+        {
+            "name":"DumpArea-Cover",
+            "pos":[512,512],
+            "vel":[0,0],
+            "mass":1,
+            "colliders":[
+                "MaskCollider(isTrigger=True,layers=4)"
+            ],
+            "surf_path":"./Images/Game/Entities/DumpOpen/00.png",
+            "behaviours": [
+                "Animation('open_anim',dir='./Images/Game/Entities/DumpOpen',fps=80)",
+                "Animation('close_anim',dir='./Images/Game/Entities/DumpOpen',fps=80,reverse=True)",
+                "DumpBehaviour('dump',open_anim='open_anim',close_anim='close_anim')"
+            ]
+        },
+        {
+            "name":"PackageButton",
+            "pos":[512,400],
+            "vel":[0,0],
+            "mass":1,
+            "rot":0,
+            "rot_vel":0,
+            "colliders":[
+                "AABBCollider((40,40),isTrigger=True,layers=2)"
+            ], 
+            "surf_path":"./Images/Game/Entities/pressure_plate.png",
+            "behaviours": [
+                "ActionTriggerInteract('go',offset=(0,-30))",
+                "RunExternalAction('go','DumpArea-Cover','dump')"
+            ]
+        },
+        {
+            "name":"shape1",
+            "pos":[512,512],
+            "vel":[0,0],
+            "mass":0.1,
+            "rot":0,
+            "rot_vel":0,
+            "colliders":[
+                "MaskCollider(layers=5)"
+            ],
+            "surf_path":"./Images/Game/Entities/Borken1.png"
+        },
+        {
+            "name":"scrap1",
+            "pos":[400,100],
+            "vel":[0,0],
+            "mass":0.1,
+            "rot":1,
+            "rot_vel":0,
+            "colliders":[
+                "MaskCollider(layers=5)"
+            ],
+            "surf_path":"./Images/Game/Entities/Borken2.png"
+        },
+        {
+            "name":"scrap2",
+            "pos":[600,300],
+            "vel":[0,0],
+            "mass":0.1,
+            "rot":1,
+            "rot_vel":0,
+            "collider":"MaskCollider(layers=5)",
+            "surf_path":"./Images/Game/Entities/Borken3.png"
+        },
+        {
+            "name":"scrap3",
+            "pos":[125,437],
+            "vel":[0,0],
+            "mass":0.1,
+            "rot":-2,
+            "rot_vel":0,
+            "collider":"MaskCollider(layers=5)",
+            "surf_path":"./Images/Game/Entities/Borken4.png"
+        },
+        {
+            "name":"Player",
+            "pos":[80,80],
+            "vel":[0,0],
+            "mass":1,
+            "rot":0,
+            "rot_vel":0,
+            "collider":"MaskCollider(layers=3)",
+            "surf_path":"./Images/Game/Player/head2.png",
+            "behaviours": [
+                "PlayerController",
+                "SpatialinatorBehaviour((.1,0.9),(0,0))",
+                "ActionTriggerTimeout('startup_dialogue',1)",
+                "Dialogue('startup_dialogue',[('It is now the next day',20)])"
+            ]
+        },
+        {
+            "name":"Uncle Bob",
+            "pos":[931,260],
+            "rot":-1.5707963267948966,
+            "mass":1,
+            "surf_path":"./Images/Game/Entities/head_blue.png",
+            "colliders":["MaskCollider","BoxCollider((100,100),isTrigger=True)"],
+            "behaviours":[
+                "RobotControllerAdvanced",
+                "WorkerBehaviour('Workspace1',(950,90),(931,400),(650,850))",
+                "ActionTriggerInteract('test',offset=(0,-20))",
+                "Condition('test',{'told_player_how_to_play_safe==False':'how_to_play_safe','found_spatial==False':'random_dialogue','found_spatial==True':'af1'})",
+                "Dialogue('how_to_play_safe',[('Sooo...',20),('Did you forget what your supposed to be doing here?',20),('§CaaaKind of....',13),('No Worries! I love helping out!',20),('For Context, we work in an android manufacturing facility.\nMe and the other guys job is to build them and put them into neat boxes...',20),('However sometimes there are defective parts, we put those aside\nIt is your job to pick them up and deposit them into the recycling thingy in the center',20),('Makes sense?',20)],next='confirm_makes_sense')",
+                "GetInput('confirm_makes_sense',['I understand 100%','Could you say what my job was again?'],next='comprehension_test')",
+                "Condition('comprehension_test',{'user_input_index==0':'knows_htps','True':'how_to_play_safe'})",
+                "ChangeState('knows_htps','told_player_how_to_play_safe','True',next='confirm_good')",
+                "Dialogue('confirm_good',[('Thats Great! If you need anything let me know. Also §Ca00Boss§Czzz should know more details about your job',20)])",
+
+                "ChooseRandom('random_dialogue',['rd1','rd2','rd3'])",
+                
+                "Dialogue('rd1',[('Do you know what is my favorite animal??',20), ('Its a dog! Because they are so cute and fluffy!',20)])",
+                "Dialogue('rd2',[('You know, the other day I was thinking about dogs\nand found an interesting crevice in the left wall!',20),('Maybe you should check it out, the little crack in the wall.',20)])",
+                "Dialogue('rd3',[('Do you ever wonder if this world you live in is not real?\nSometimes I do...', 20)])",
+
+                "Dialogue('af1',[('Oooh you have an interesting gizmo!',20),('It seems to swap the places of things, very nice!',20)])"
+
+            ]
+        },
+        {
+            "name":"Workspace1",
+            "pos":[931,300],
+            "rot":0,
+            "mass":"inf",
+            "surf_path":"./Images/Game/Entities/damaged_table.png",
+            "collider":"MaskCollider"
+        },
+        {
+            "name":"Workspace1_Paper",
+            "pos":[970,300],
+            "rot":-2.9,
+            "mass":"inf",
+            "surf_path":"./Images/Game/Entities/smol_paper.png",
+            "collider":"AABBCollider((1,1),rotates=False,layers=2,isTrigger=True)"
+        },
+        {
+            "name":"Um Aktually Guy",
+            "pos":[931,560],
+            "rot":-1.5707963267948966,
+            "mass":1,
+            "surf_path":"./Images/Game/Entities/head_green.png",
+            "collider":"MaskCollider",
+            "behaviours":[
+                "RobotControllerAdvanced",
+                "WorkerBehaviour('Workspace2',(950,90),(931,700),(650,850))"
+            ]
+        },
+        {
+            "name":"Workspace2",
+            "pos":[931,600],
+            "rot":0,
+            "mass":"inf",
+            "surf_path":"./Images/Game/Entities/damaged_table.png",
+            "collider":"MaskCollider"
+        },
+        {
+            "name":"Workspace2_Paper",
+            "pos":[920,600],
+            "rot":-1.9,
+            "mass":"inf",
+            "surf_path":"./Images/Game/Entities/smol_paper.png",
+            "collider":"AABBCollider((1,1),rotates=False,layers=2,isTrigger=True)"
+        },
+        {
+            "name":"Boss Meanie",
+            "pos":[300,925],
+            "rot":1.5707963267948966,
+            "surf_path":"./Images/Game/Entities/boss_head.png",
+            "colliders":[
+                "MaskCollider",
+                "BoxCollider((40,40),isTrigger=True,layers=2)"
+            ],
+            "behaviours":[
+                "RobotControllerAdvanced",
+                "ActionTriggerInteract('test1',offset=(0,-30))",
+                "Condition('test1',{'scrap_collected_today>=1':'follow_me_dialogue','told_player_quota==False':'tell_player_quota','scrap_collected_today<10':'mad_dialogue'})",
+                "Dialogue('tell_player_quota',[('§Ce99Hey what are you doing! Go Back to your station!',20),('The next time I see you,\nyou better have completed your quota of §Caaa10§Czzz scrap!',20)],next='mark_told_quota')",
+                "ChangeState('mark_told_quota','told_player_quota','True')",
+                "Dialogue('mad_dialogue',[('§Ce99What did I just tell you?!',20),('§Ce99You only have {scrap_collected_today}!!!',20),('§Cg55This is your final warning...',15)])",
+                "ActionTriggerTimeout('test',300)",
+                "Condition('test',{'scrap_collected_today>=10':'happy','scrap_collected_today<10':'mad'})",
+                "Dialogue('mad',[('§Ce99You have taken so long that you shift is over!',20)],next='bbad')",
+                "ChangeState('bbad','boss_favorability','boss_favorability-1',next='last_test')",
+
+                
+
+                "Dialogue('follow_me_dialogue',[('Wow you already completed your quota!',20),('Now you can go back to your priso-\nI mean company sponsored housing!',20),('Follow Me!',20)],next='go_to_door')",
+                "GoToPosition('go_to_door',(370,950),next='abc')",
+                "ChangeState('abc','boss_favorability','boss_favorability+1',next='abc2')",
+                "ChangeState('abc2','scrap_collected_today','0',next='last_test')",
+                "Condition('last_test',{'boss_favorability==3':'to_docks','boss_favorability==0-1':'lose','True':'to_day_2'})",
+                "SceneTransporter('to_day_2','warehouse-day2',as_new=True)",
+                "SceneTransporter('to_docks','hallway')",
+                "SceneTransporter('lose','docks')"
+
+            ]
+        },
+        {
+            "name":"Crack In the Wall",
+            "pos":[30,725],
+            "mass":"inf",
+            "colliders":[
+                "BoxCollider((60,40),isTrigger=True)"
+            ],
+            "behaviours":[
+                "ActionTriggerInteract('test',offset=(0,-30))",
+                "Condition('test',{'found_spatial==False':'found_dialogue','found_spatial==True':'already_found'})",
+                "Dialogue('already_found',[('Just a normal crack in the wall',20)])",
+                "ChangeState('found','found_spatial','True',next='popup')",
+                "Dialogue('found_dialogue',[('Huh there is something here...',18),('On the side it says §Cz0zSPATIAL-inator 3000§Czzz ...',20)],next='found')",
+                "Notify('popup','You Found A §Cz0zSPATIAL-inator 3000§Czzz!',2,(0,-50),(0,-10))"
+            ]
+        },
+        {
+            "name":"left_wall",
+            "pos":[24,512],
+            "mass":"inf",
+            "collider":"AABBCollider((40,950),layers=7,rotates=False)"
+        },
+        {
+            "name":"right_wall",
+            "pos":[1000,512],
+            "mass":"inf",
+            "collider":"AABBCollider((40,950),layers=7,rotates=False)"
+        },
+        {
+            "name":"bottom_wall",
+            "pos":[512,985],
+            "mass":"inf",
+            "collider":"AABBCollider((950,40),layers=7,rotates=False)"
+        },
+        {
+            "name":"top_wall",
+            "pos":[512,39],
+            "mass":"inf",
+            "collider":"AABBCollider((950,40),layers=7,rotates=False)"
+        }
+    ],
+    "behaviours": [
+        "SaveEntities",
+        "CameraFollowPlayer",
+        "TrackTime(offset=(10,10))",
+        "ShowDetail('Pieces Scrapped: {scrap_collected_today}',offset=(10,40))",
+        "ShowDetail('B F: {boss_favorability}',offset=(10,40))"
+    ]
+}

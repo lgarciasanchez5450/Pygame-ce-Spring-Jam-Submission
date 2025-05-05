@@ -7,7 +7,6 @@ class ActionTrigger(Behaviour):
     __slots__ = 'action','behaviour','action_b'
     def __init__(self,action:str):
         self.action = action
-        
 
     def start(self, gameObject:EntityType, game:GameType):
         for behaviour in gameObject.getBehaviours(Action):

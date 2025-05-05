@@ -1,0 +1,8 @@
+{
+    "name":"ManillaBox",
+    "pos":[931,260],
+    "rot":-1.5707963267948966,
+    "mass":0.5,
+    "surf_path":"./Images/Game/Entities/manilla_box.png",
+    "collider":"MaskCollider(layers=2)"
+}
